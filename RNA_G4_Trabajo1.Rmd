@@ -1,0 +1,88 @@
+---
+output: 
+  html_document:
+    toc: false
+    theme: cerulean
+    df_print: paged
+    number_sections: false
+---
+<div style="text-align: center; color: black; margin-top: 60px;">
+
+<h1>TRABAJO 1: OPTIMIZACIÓN HEURÍSTICA</h1>
+<h2>REDES NEURONALES Y ALGORITMOS BIOINSPIRADOS</h2>
+<br><br><br>
+<p><strong>Presentado por:</strong></p>
+<p>Marcos David Carrillo Builes<br> Tomás Escobar Rivera Monsalve<br> Jose Fernando López Ramírez <br> Esteban Vásquez Pérez</p>
+<br><br>
+<p><strong>Profesor:</strong> Juan David Ospina Arango</p>
+<p><strong>Monitor:</strong> Andrés Mauricio Zapata Rincón</p>
+<br>
+<img src="logo_unal.png" alt="University Logo" width="100px">
+<br><br>
+<p>Universidad Nacional de Colombia<br> Facultad de Minas<br> Ingeniería de Sistemas e Informática</p>
+<p><strong>`r format(Sys.Date(), "%d de %B de %Y")`</strong></p>
+</div>
+<style>
+body {
+  font-family: "Georgia", serif;
+  margin: 40px;
+}
+h1, h2, h3 {
+  color: #000;
+}
+p {
+  font-size: 16px;
+}
+</style>
+
+```{r}
+knitr::opts_chunk$set(echo=TRUE)
+library(GA)
+```
+
+# Introducción
+
+Aquí van las partes del trabajo
+
+## Segunda
+
+### Tercera
+
+#### Imagen Ejemplo
+
+```{r figure-name, fig.cap="Figura 1. Descripción", echo=FALSE, out.width="10%", fig.align='center'}
+knitr::include_graphics("logo_unal.png")
+```
+
+#### Ecuación Ejemplo
+
+$$
+f: \mathbb{R}^n \rightarrow \mathbb{R}
+$$
+
+$$
+f(\mathbf{x}) \approx f(\mathbf{x}_0)
++ \nabla f(\mathbf{x}_0)^\top (\mathbf{x} - \mathbf{x}_0)
++ \frac{1}{2} (\mathbf{x} - \mathbf{x}_0)^\top H_f(\mathbf{x}_0) (\mathbf{x} - \mathbf{x}_0)
+$$
+
+\begin{equation}
+  Hf(x) = 
+  \begin{pmatrix}
+    \frac{\partial}{\partial x_1}\nabla f^T \\
+    \frac{\partial}{\partial x_2}\nabla f^T
+  \end{pmatrix}
+  =
+  \begin{pmatrix}
+    2 & 0 \\
+    0 & 2
+  \end{pmatrix}
+\end{equation}
+
+#### Bloque R Ejemplo
+
+```{r}
+x <- 100
+```
+
+## Bibliografía
