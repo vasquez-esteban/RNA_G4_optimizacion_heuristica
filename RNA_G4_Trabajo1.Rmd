@@ -113,6 +113,7 @@ x <- 100
 
 ## Repositorio en Github
 
-[Link](https://github.com/vasquez-esteban/RNA_G4_optimizacion_heuristica)
+[Github](https://github.com/vasquez-esteban/RNA_G4_optimizacion_heuristica)
+[Entrada Blog](https://rpubs.com/evasp/rna-g4-optimizacion-heuristica)
 
 ## Bibliografía
