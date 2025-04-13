@@ -40,9 +40,28 @@ knitr::opts_chunk$set(echo=TRUE)
 library(GA)
 ```
 
-# Introducción
+# Parte 1: Optimización Numérica
 
-Aquí van las partes del trabajo
+## Función de Schwefel
+
+## Función de Griewank
+
+- Optimice las funciones en dos y tres dimensiones usando un método de descenso por gradiente con condición inicial aleatoria
+
+- Optimice las funciones en dos y tres dimensiones usando: algoritmos evolutivos, optimización de partículas y evolución diferencial
+
+- Represente con un gif animado o un video el proceso de optimización de descenso por gradiente y el proceso usando el método heurístico.
+
+- ¿Qué aportaron los métodos de descenso por gradiente y qué aportaron los métodos heurísticos? Para responder a esta pregunta considere el valor final de la función objetivo y el número de evaluaciones de la función objetivo. Para responder a esta pregunta es posible que se requiera hacer varias corridas de los algoritmos.
+
+
+# Parte 2: Optimización Combinatoria
+
+Un vendedor debe hacer un recorrido por todas y cada de las 13 ciudades principales de Colombia. 
+
+Utilice colonias de hormigas y algoritmos genéticos para encontrar el orden óptimo. El costo de desplazamiento entre ciudades es la suma del valor de la hora del vendedor (es un parámetro que debe estudiarse), el costo de los peajes y el costo del combustible. Cada equipo debe definir en qué carro hace el recorrido el vendedor y de allí extraer el costo del combustible.
+
+Adicionalmente represente con un gif animado o un video cómo se comporta la mejor solución usando un gráfico del recorrido en el mapa de Colombia.
 
 ## Segunda
 
@@ -84,5 +103,16 @@ $$
 ```{r}
 x <- 100
 ```
+
+## Reporte de Contribución Individual
+
+- Marcos David Carrillo Builes
+- Tomás Escobar Rivera Monsalve
+- Jose Fernando López Ramírez
+- Esteban Vásquez Pérez
+
+## Repositorio en Github
+
+[Link](https://github.com/vasquez-esteban/RNA_G4_optimizacion_heuristica)
 
 ## Bibliografía
