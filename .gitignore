@@ -62,3 +62,7 @@ rsconnect/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+install.sh
+uninstall.sh
+/rsconnect

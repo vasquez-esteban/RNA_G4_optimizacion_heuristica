@@ -1,71 +1,208 @@
 ---
-output: 
+output:
   html_document:
     toc: false
-    theme: cerulean
+    css: apa_style.css
+    theme: united
+    highlight: pygments
     df_print: paged
     number_sections: false
+  pdf_document:
+    toc: false
 ---
-<div style="text-align: center; color: black; margin-top: 60px;">
 
+<!-- Portada del Trabajo -->
+
+::: {style="text-align: center; color: black; margin-top: 60px;"}
 <h1>TRABAJO 1: OPTIMIZACIÓN HEURÍSTICA</h1>
+
 <h2>REDES NEURONALES Y ALGORITMOS BIOINSPIRADOS</h2>
+
 <br><br><br>
+
 <p><strong>Presentado por:</strong></p>
+
 <p>Marcos David Carrillo Builes<br> Tomás Escobar Rivera Monsalve<br> Jose Fernando López Ramírez <br> Esteban Vásquez Pérez</p>
+
 <br><br>
+
 <p><strong>Profesor:</strong> Juan David Ospina Arango</p>
+
 <p><strong>Monitor:</strong> Andrés Mauricio Zapata Rincón</p>
-<br>
-<img src="logo_unal.png" alt="University Logo" width="100px">
-<br><br>
+
+<br> <img src="logo_unal.png" alt="University Logo" width="100px"/> <br><br>
+
 <p>Universidad Nacional de Colombia<br> Facultad de Minas<br> Ingeniería de Sistemas e Informática</p>
+
 <p><strong>`r format(Sys.Date(), "%d de %B de %Y")`</strong></p>
-</div>
-<style>
-body {
-  font-family: "Georgia", serif;
-  margin: 40px;
-}
-h1, h2, h3 {
-  color: #000;
-}
-p {
-  font-size: 16px;
-}
-</style>
+:::
+
+```{r setup, include=FALSE}
+# --------------------------------------------------
+# BLOQUE PRINCIPAL DE LIBRERÍAS (REEMPLAZA TODOS LOS LIBRARY() INDIVIDUALES)
+# --------------------------------------------------
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(
+  # Optimización numérica
+  numDeriv,       # Gradientes/Hessianos
+  GA,              # Algoritmos genéticos
+  pso,             # Optimización por enjambre
+  DEoptim,         # Evolución diferencial
+  
+  # Optimización combinatoria
+  TSP,             # Problema del vendedor viajero
+  acopula,         # Colonias de hormigas
+  
+  # Visualización
+  ggplot2,         # Gráficos estáticos
+  gganimate,       # Animaciones
+  av,              # Exportar videos
+  sf,              # Geodatos
+  maps,            # Mapas base
+  plotly,          # Gráficos interactivos
+  
+  # Datos
+  dplyr            # Manipulación de datos
+)
+
+knitr::opts_chunk$set(echo = TRUE)
+# --------------------------------------------------
+```
+
+#### Verificación de la carga de paquetes
 
 ```{r}
-knitr::opts_chunk$set(echo=TRUE)
-library(GA)
+packages <- c(
+  "numDeriv", "GA", "pso", "DEoptim", "TSP", "acopula",
+  "ggplot2", "gganimate", "av", "sf", "maps", "plotly", "dplyr"
+)
+
+not_installed <- packages[!sapply(packages, require, character.only = TRUE)]
+
+if (length(not_installed) == 0) {
+  message("Paquetes instalados correctamente ")
+} else {
+  message("No se instalaron los paquetes: ", paste(not_installed, collapse = ", "))
+}
 ```
 
 # Parte 1: Optimización Numérica
 
+-   Optimice las funciones en dos y tres dimensiones usando un método de descenso por gradiente con condición inicial aleatoria
+
+-   Optimice las funciones en dos y tres dimensiones usando: algoritmos evolutivos, optimización de partículas y evolución diferencial
+
+-   Represente con un gif animado o un video el proceso de optimización de descenso por gradiente y el proceso usando el método heurístico.
+
+-   ¿Qué aportaron los métodos de descenso por gradiente y qué aportaron los métodos heurísticos? Para responder a esta pregunta considere el valor final de la función objetivo y el número de evaluaciones de la función objetivo. Para responder a esta pregunta es posible que se requiera hacer varias corridas de los algoritmos.
+
 ## Función de Schwefel
 
-## Función de Griewank
+### Optimización Numérica de Funciones Multimodales
 
-- Optimice las funciones en dos y tres dimensiones usando un método de descenso por gradiente con condición inicial aleatoria
+### Definición de Funciones de Prueba
 
-- Optimice las funciones en dos y tres dimensiones usando: algoritmos evolutivos, optimización de partículas y evolución diferencial
+```{r functions}
+# Función Schwefel (2D y 3D)
+schwefel <- function(x) {
+  # COMPLETAR: Implementar fórmula matemática
+}
 
-- Represente con un gif animado o un video el proceso de optimización de descenso por gradiente y el proceso usando el método heurístico.
+# Función Griewank (2D y 3D)
+griewank <- function(x) {
+  # COMPLETAR: Implementar fórmula matemática
+}
+```
 
-- ¿Qué aportaron los métodos de descenso por gradiente y qué aportaron los métodos heurísticos? Para responder a esta pregunta considere el valor final de la función objetivo y el número de evaluaciones de la función objetivo. Para responder a esta pregunta es posible que se requiera hacer varias corridas de los algoritmos.
+#### 2. Descenso de Gradiente (Implementación Manual)
 
+```{r gradient_descent}
+
+descenso_gradiente <- function(fun, x0, eta = 0.01, max_iter = 1000) {
+  # COMPLETAR: 
+  # 1. Inicializar matriz para almacenar iteraciones
+  # 2. Bucle para actualizar x usando gradiente numérico
+  # 3. Criterio de parada (tolerancia)
+}
+```
+
+#### 3. Métodos Heurísticos
+
+##### 3.1 Algoritmo Genético (GA)
+
+```{r genetic_algorithm}
+
+# Ejemplo Para cargar paquetes
+# resultado <- GA::ga(type = "real-valued", ...)
+
+# COMPLETAR:
+# 1. Configurar fitness function
+# 2. Definir límites (lower/upper)
+# 3. Ajustar popSize y maxiter
+```
+
+##### 3.2 Optimización por Enjambre (PSO)
+
+```{r pso}
+# COMPLETAR:
+# 1. Configurar fn, lower, upper
+# 2. Ajustar control$maxit
+```
+
+##### 3.3 Evolución Diferencial (DE)
+
+```{r deoptim}
+# COMPLETAR:
+# 1. Configurar fn, lower, upper
+# 2. Ajustar control$itermax
+```
+
+## 4. Visualización de Resultados
+
+### 4.1 Animación del Descenso de Gradiente
+
+```{r animation_gd}
+
+# COMPLETAR:
+# 1. Crear dataframe con trayectorias
+# 2. Graficar con transition_reveal()
+```
+
+### 4.2 Animación de Métodos Heurísticos
+
+```{r animation_heuristic}
+# COMPLETAR:
+# 1. Extraer trayectorias de GA/PSO/DE
+# 2. Crear animación similar
+```
+
+## 5. Análisis Comparativo
+
+```{r comparison}
+# COMPLETAR:
+# 1. Crear tabla comparativa con:
+#   - Método
+#   - Iteraciones
+#   - Valor óptimo
+#   - Tiempo de ejecución (system.time())
+```
+
+## 6. Conclusiones
+
+```{r conclusions, eval=FALSE}
+# DISCUTIR:
+# 1. Ventajas/desventajas de cada método
+# 2. Sensibilidad a parámetros
+# 3. Recomendaciones para cada función
+```
 
 # Parte 2: Optimización Combinatoria
 
-Un vendedor debe hacer un recorrido por todas y cada de las 13 ciudades principales de Colombia. 
+Un vendedor debe hacer un recorrido por todas y cada de las 13 ciudades principales de Colombia.
 
 Utilice colonias de hormigas y algoritmos genéticos para encontrar el orden óptimo. El costo de desplazamiento entre ciudades es la suma del valor de la hora del vendedor (es un parámetro que debe estudiarse), el costo de los peajes y el costo del combustible. Cada equipo debe definir en qué carro hace el recorrido el vendedor y de allí extraer el costo del combustible.
 
 Adicionalmente represente con un gif animado o un video cómo se comporta la mejor solución usando un gráfico del recorrido en el mapa de Colombia.
-
-## Segunda
-
-### Tercera
 
 #### Imagen Ejemplo
 
@@ -98,22 +235,16 @@ $$
   \end{pmatrix}
 \end{equation}
 
-#### Bloque R Ejemplo
-
-```{r}
-x <- 100
-```
-
 ## Reporte de Contribución Individual
 
-- Marcos David Carrillo Builes
-- Tomás Escobar Rivera Monsalve
-- Jose Fernando López Ramírez
-- Esteban Vásquez Pérez
+-   Marcos David Carrillo Builes
+-   Tomás Escobar Rivera Monsalve
+-   Jose Fernando López Ramírez
+-   Esteban Vásquez Pérez
 
 ## Repositorio en Github
 
-[Github](https://github.com/vasquez-esteban/RNA_G4_optimizacion_heuristica)
-[Entrada Blog](https://rpubs.com/evasp/rna-g4-optimizacion-heuristica)
+- [Github](https://github.com/vasquez-esteban/RNA_G4_optimizacion_heuristica)
+- [Entrada Blog](https://rpubs.com/evasp/rna-g4-optimizacion-heuristica)
 
 ## Bibliografía
