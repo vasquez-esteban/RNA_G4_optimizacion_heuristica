@@ -98,14 +98,36 @@ if (length(not_installed) == 0) {
 
 ## Función de Schwefel
 
+$$
+f(\mathbf{x}) = 418.9829d - \sum_{i=1}^d x_i \sin(\sqrt{|x_i|})
+$$
+
+**Descripción:**
+
+*Dimensiones:* $d$
+
+La función de Schwefel cuenta con múltiples mínimos locales.
+
+**Dominio:**
+
+La función se evalúa en el hipercubo: $x_i \in [-500, 500]$, para todo $i = 1, \dots, d$.
+
+**Mínimo Global:**
+
+$f(\mathbf{x}^*) = 0$, en $\mathbf{x}^* = (420.9687, \dots, 420.9687)$
+
 ### Optimización Numérica de Funciones Multimodales
 
 ### Definición de Funciones de Prueba
 
 ```{r functions}
-# Función Schwefel (2D y 3D)
+# Función Schwefel
 schwefel <- function(x) {
-  # COMPLETAR: Implementar fórmula matemática
+  A <- 418.9829
+  d <- length(x)
+  z <- A*d - sum(x * sin(sqrt(abs(x))))
+  
+  return (z)
 }
 
 # Función Griewank (2D y 3D)
@@ -114,17 +136,199 @@ griewank <- function(x) {
 }
 ```
 
-#### 2. Descenso de Gradiente (Implementación Manual)
+Sabemos que la función de Schwefel tiene un mínimo local en $x^*=(420.9687, \cdots, 420.9687)$
 
-```{r gradient_descent}
+```{r}
+schwefel(c(420.9687, 420.9687))
+schwefel(c(420.9687, 420.9687, 420.9687))
+```
 
-descenso_gradiente <- function(fun, x0, eta = 0.01, max_iter = 1000) {
-  # COMPLETAR: 
-  # 1. Inicializar matriz para almacenar iteraciones
-  # 2. Bucle para actualizar x usando gradiente numérico
-  # 3. Criterio de parada (tolerancia)
+Que representan valores cercanos a cero debido a errores de redondeo introducidos en la programación de la función.
+
+Ahora vamos a visualizar la función
+
+```{r}
+# Código para graficar cualquier función
+plot_function <- function(func, x_range = c(-500, 500), n_points = 1000, highlight_x = NULL) {
+  # Crear el vector de x en el rango especificado
+  x <- seq(x_range[1], x_range[2], length.out = n_points)
+  
+  # Evaluar la función en los puntos de x
+  y <- sapply(x, function(xi) func(c(xi)))
+  
+  # Graficar la función
+  plot(x, y, type = "l", col = "blue", lwd = 2,
+       main = paste("Gráfico de la función", deparse(substitute(func))),
+       xlab = "x", ylab = paste(deparse(substitute(func)), "(x)"))
+  
+  # Si se especifica un valor de x para destacar, agregar la línea vertical y el punto
+  if (!is.null(highlight_x)) {
+    highlight_y <- func(c(highlight_x))
+    abline(v = highlight_x, col = "red", lty = 2)
+    points(highlight_x, highlight_y, col = "red", pch = 19)
+  }
 }
 ```
+
+```{r fig.cap="**Fig 1.** _Evaluación de Schwefel (2D)_" , fig.align="center", out.width="70%"}
+plot_function(schwefel, highlight_x = 420.9687)
+```
+
+```{r}
+plot_function_3d <- function(func, 
+                           x_range = c(-500, 500), 
+                           y_range = c(-500, 500), 
+                           resolution = 100,
+                           optimal_points = NULL,
+                           colorscale = "Viridis",
+                           title = "Visualización 3D de función",
+                           x_label = "x",
+                           y_label = "y",
+                           z_label = "f(x,y)") {
+  
+  # Crear grid de puntos
+  x <- seq(x_range[1], x_range[2], length.out = resolution)
+  y <- seq(y_range[1], y_range[2], length.out = resolution)
+  
+  # Evaluar la función en toda la cuadrícula
+  z <- outer(x, y, Vectorize(function(x, y) func(c(x, y))))
+  
+  # Crear el gráfico 3D interactivo
+  p <- plot_ly(x = ~x, y = ~y, z = ~z) %>%
+    add_surface(colorscale = colorscale) 
+  
+  # Agregar puntos óptimos si se especifican
+  if (!is.null(optimal_points)) {
+    for (i in 1:nrow(optimal_points)) {
+      point <- optimal_points[i, ]
+      p <- p %>% add_markers(
+        x = point$x, 
+        y = point$y, 
+        z = func(c(point$x, point$y)),
+        marker = list(color = point$color, size = point$size),
+        name = point$name
+      )
+    }
+  }
+  
+  # Configurar el diseño del gráfico
+  p <- p %>% layout(
+    title = title,
+    scene = list(
+      xaxis = list(title = x_label),
+      yaxis = list(title = y_label),
+      zaxis = list(title = z_label)
+    )
+  )
+  
+  return(p)
+}
+```
+
+```{r fig.cap="**Fig 2.** *Evaluación de Schwefel (3D)*", fig.align="center", out.width="70%", layout.align="center"}
+# Definir óptimo schwefel
+optimal_points <- data.frame(
+  x = c(420.9687),
+  y = c(420.9687),
+  name = c("Óptimo global"),
+  color = c("red"),
+  size = c(5)
+)
+
+# Graficar la función con su óptimo
+plot_function_3d(
+  func = schwefel,
+  x_range = c(-500, 500),
+  y_range = c(-500, 500),
+  resolution = 100,
+  optimal_points = optimal_points,
+  title = "Función de Schwefel (2D -> 3D)",
+  z_label = "Schwefel(x, y)"
+)
+```
+
+```{r fig.cap="**Fig 3.** _Curvas de Nivel de Schwefel_" , fig.align="center", out.width="70%"}
+# Crear una grilla de puntos (para 2D)
+x_vals <- seq(-500, 500, length.out = 200)
+y_vals <- seq(-500, 500, length.out = 200)
+grid <- expand.grid(x = x_vals, y = y_vals) %>%
+  rowwise() %>%
+  mutate(z = schwefel(c(x, y))) %>%
+  ungroup()
+
+# Crear gráfico de curvas de nivel
+ggplot(grid, aes(x = x, y = y, z = z)) +
+  geom_contour_filled(bins = 30) +  # Colores suaves
+  geom_contour(color = "black", alpha = 0.3) +  # Líneas de nivel
+  geom_point(aes(x = 420.9687, y = 420.9687), color = "red", size = 3) +  # Óptimo
+  annotate("text", x = 420.9687, y = 420.9687 + 30, label = "Óptimo", color = "red") +
+  theme_minimal() +
+  scale_fill_viridis_d() +
+  labs(
+    title = "Curvas de nivel - Función de Schwefel",
+    subtitle = "Visualización 2D de la superficie 3D",
+    x = "Valor de x_1",
+    y = "Valor de x_2",
+    fill = "Valor de la función"
+  )
+```
+
+#### 2. Optimización por descenso del gradiente o métodos Quasi-Newton (2D)
+
+Como podemos ver, la función cuenta con varios óptimos locales que pueden hacer que un método numérico basado en el gradiente sea propenso a errores. Para ello vamos a ver cómo se comporta la solución del método `optim(method = "BFGS")` que es el más parecido al que vimos en clase. Este método Quasi-Newton optimiza la función utilizando una aproximación del gradiente y la matriz Hessiana, sin calcularlos directamente.
+
+Antes de esto vamos a crear un vector para seguir las soluciones halladas.
+
+```{r}
+# Vector para almacenar los valores intermedios de la función
+schwefel_2d_history <- list()
+
+# Función envolvente que guarda los valores intermedios
+schwefel_with_history <- function(x) {
+  val <- schwefel(x)
+  schwefel_2d_history <<- c(schwefel_2d_history, list(list(x = x, value = val)))  # Guarda el valor intermedio
+  return(val)
+}
+```
+
+```{r optimización por BFGS}
+set.seed(1987)
+
+x0_2d <- runif(1, min=-500, max=500)
+
+# Optimización
+res_2d <- optim(
+  par = x0_2d,
+  fn = schwefel_with_history,
+  method = "BFGS",
+  control = list(trace = 1, REPORT = 1, maxit = 500),
+  hessian = FALSE  # En 2d no usamos el Hessiano sino el gradiente únicamente
+)
+
+# Resultado
+res_2d$par       # Coordenadas del mínimo encontrado
+res_2d$value     # Valor mínimo de la función
+```
+
+##### Comportamiento de la solución 2d con descenso del gradiente
+
+```{r}
+
+
+
+
+```
+
+
+
+
+
+#### 2. Optimización por descenso del gradiente o métodos Quasi-Newton (3D)
+
+
+
+
+
 
 #### 3. Métodos Heurísticos
 
@@ -162,7 +366,6 @@ descenso_gradiente <- function(fun, x0, eta = 0.01, max_iter = 1000) {
 ### 4.1 Animación del Descenso de Gradiente
 
 ```{r animation_gd}
-
 # COMPLETAR:
 # 1. Crear dataframe con trayectorias
 # 2. Graficar con transition_reveal()
@@ -244,7 +447,6 @@ $$
 
 ## Repositorio en Github
 
-- [Github](https://github.com/vasquez-esteban/RNA_G4_optimizacion_heuristica)
-- [Entrada Blog](https://rpubs.com/evasp/rna-g4-optimizacion-heuristica)
+-   [Github](https://github.com/vasquez-esteban/RNA_G4_optimizacion_heuristica)
 
 ## Bibliografía
