@@ -47,7 +47,7 @@ docs/
 po/*~
 
 # RStudio Connect folder
-rsconnect/
+src/rsconnect/
 
 # HTML output files
 *.html

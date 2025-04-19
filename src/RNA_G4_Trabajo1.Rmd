@@ -383,6 +383,104 @@ res_3d$value     # Valor mínimo de la función
 
 ### 3.1 Animación del Descenso de Gradiente
 
+Para crear la animación debemos generar múltiples imágenes usando el historial de soluciones evaluadas en la función objetivo.
+
+#### Schwefel
+
+```{r}
+# Base de la curva de la función schwefel
+x_vals <- seq(-500, 500, length.out = 1000)
+curve_df_2d <- data.frame(x = x_vals, value = sapply(x_vals, function(xi) schwefel(c(xi))))
+
+# Extraer historia del optimizador
+schwefel_df_2d <- data.frame(
+  step = 1:length(schwefel_2d_history),
+  x = sapply(schwefel_2d_history, function(p) p$x),
+  value = sapply(schwefel_2d_history, function(p) p$value)
+)
+```
+
+**Camino de la solución en Schwefel 2D**
+
+```{r eval=FALSE}
+p <- ggplot() +
+  geom_line(data = curve_df_2d, aes(x = x, y = value), color = "blue", linewidth = 1.2) +
+  geom_point(data = schwefel_df_2d, aes(x = x, y = value), color = "red", size = 2) +
+  transition_reveal(along = step) +
+  labs(title = "Paso del optimizador: {frame_along}", x = "x", y = "Schwefel(x)") +
+  theme_minimal()
+
+animate(p, fps = 4, width = 600, height = 400, renderer = gifski_renderer("files/schwefel_path.gif"))
+```
+
+```{r}
+knitr::include_graphics("files/schwefel_path.gif")
+```
+
+Como podemos notar, los algoritmos numéricos dependen altamente de la elección del punto inicial $x_0^*$. En el GIF se ve además que la solución se desplaza por fuera de la gráfica, esto se debe a que el optimizador podría estar explorando soluciones que se mueven en $c(x1)$, pero al graficar los frames se pueden ver puntos intermedios en la solución. Sin embargo finalmente se vuelve a la gráfica cuando se está estabilizando el óptimo.
+
+**Camino de la solución en Schwefel 3D con curvas de nivel**
+
+```{r}
+x_vals <- seq(-500, 500, length.out = 200)
+y_vals <- seq(-500, 500, length.out = 200)
+grid <- expand.grid(x = x_vals, y = y_vals) %>%
+  rowwise() %>%
+  mutate(z = schwefel(c(x, y))) %>%
+  ungroup()
+
+schwefel_df_3d <- data.frame(
+  step = 1:length(schwefel_3d_history),
+  x = sapply(schwefel_3d_history, function(p) p$x[1]),
+  y = sapply(schwefel_3d_history, function(p) p$x[2]),
+  z = sapply(schwefel_3d_history, function(p) p$value)
+)
+```
+
+```{r eval=FALSE}
+p <- ggplot() +
+  # Capa BASE de relleno
+  geom_raster(data = grid, aes(x = x, y = y, fill = z), alpha = 0.5) +
+  scale_fill_viridis_c(option = "viridis", name = "Valor Schwefel") +
+  
+  # Curvas de nivel
+  geom_contour(data = grid, aes(x = x, y = y, z = z), 
+               color = "black", alpha = 0.4, bins = 15) +
+  
+  # Trayectoria del optimizador
+  geom_path(data = schwefel_df_3d, aes(x = x, y = y), 
+            color = "darkgrey", alpha = 0.5, linewidth = 0.8) +
+  
+  # Puntos animados (nuevo esquema de colores)
+  geom_point(data = schwefel_df_3d, aes(x = x, y = y, color = step), 
+             size = 3, show.legend = FALSE) +
+  scale_color_gradient(low = "orange", high = "red") +  # Azul a verde
+  
+  # Punto óptimo
+  geom_point(aes(x = 420.9687, y = 420.9687), 
+             shape = 17, color = "cyan", size = 4) +
+  annotate("text", x = 420.9687, y = 450, label = "Óptimo Global", 
+           color = "cyan", fontface = "bold") +
+  
+  # Estilo y animación
+  theme_minimal() +
+  labs(
+    title = "Optimización de la Función Schwefel\nPaso: {frame_time}",
+    x = "Coordenada x₁",
+    y = "Coordenada x₂"
+  ) +
+  transition_time(step) +
+  shadow_wake(wake_length = 0.1, alpha = 0.3) +
+  theme(plot.margin = margin(t = 30, r = 10, b = 10, l = 10, unit = "pt"))
+
+# Renderizar la animación
+animate(p, fps = 7, width = 800, height = 600, renderer = gifski_renderer("files/schwefel_3d_path.gif"))
+```
+
+```{r}
+knitr::include_graphics("files/schwefel_3d_path.gif")
+```
+
 ```{r animation_gd}
 # COMPLETAR:
 # 1. Crear dataframe con trayectorias
