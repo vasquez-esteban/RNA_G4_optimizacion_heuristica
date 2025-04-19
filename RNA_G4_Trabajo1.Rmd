@@ -96,11 +96,16 @@ if (length(not_installed) == 0) {
 
 -   ¿Qué aportaron los métodos de descenso por gradiente y qué aportaron los métodos heurísticos? Para responder a esta pregunta considere el valor final de la función objetivo y el número de evaluaciones de la función objetivo. Para responder a esta pregunta es posible que se requiera hacer varias corridas de los algoritmos.
 
-## Función de Schwefel
+
+## 0. Exploración de las funciones
+
+### Función de Schwefel
 
 $$
 f(\mathbf{x}) = 418.9829d - \sum_{i=1}^d x_i \sin(\sqrt{|x_i|})
 $$
+
+
 
 **Descripción:**
 
@@ -116,9 +121,11 @@ La función se evalúa en el hipercubo: $x_i \in [-500, 500]$, para todo $i = 1,
 
 $f(\mathbf{x}^*) = 0$, en $\mathbf{x}^* = (420.9687, \dots, 420.9687)$
 
-### Optimización Numérica de Funciones Multimodales
+### Función de Griewank
 
-### Definición de Funciones de Prueba
+Definir función Aquí
+
+#### Definición de Funciones
 
 ```{r functions}
 # Función Schwefel
@@ -143,9 +150,9 @@ schwefel(c(420.9687, 420.9687))
 schwefel(c(420.9687, 420.9687, 420.9687))
 ```
 
-Que representan valores cercanos a cero debido a errores de redondeo introducidos en la programación de la función.
+Estos resultados representan valores aproximados a cero debido a errores de redondeo introducidos en la programación de la función.
 
-Ahora vamos a visualizar la función
+Ahora vamos a visualizar la función:
 
 ```{r}
 # Código para graficar cualquier función
@@ -273,25 +280,36 @@ ggplot(grid, aes(x = x, y = y, z = z)) +
   )
 ```
 
-#### 2. Optimización por descenso del gradiente o métodos Quasi-Newton (2D)
+## 1. Optimización por descenso del gradiente o métodos Quasi-Newton
 
 Como podemos ver, la función cuenta con varios óptimos locales que pueden hacer que un método numérico basado en el gradiente sea propenso a errores. Para ello vamos a ver cómo se comporta la solución del método `optim(method = "BFGS")` que es el más parecido al que vimos en clase. Este método Quasi-Newton optimiza la función utilizando una aproximación del gradiente y la matriz Hessiana, sin calcularlos directamente.
 
-Antes de esto vamos a crear un vector para seguir las soluciones halladas.
+Antes de esto vamos a crear vectores para seguir las soluciones halladas.
 
 ```{r}
-# Vector para almacenar los valores intermedios de la función
+# Vectores para almacenar los valores intermedios de la función
 schwefel_2d_history <- list()
 
-# Función envolvente que guarda los valores intermedios
-schwefel_with_history <- function(x) {
+# Función para llenar el camino de valores 2D
+schwefel_with_history_2d <- function(x) {
   val <- schwefel(x)
   schwefel_2d_history <<- c(schwefel_2d_history, list(list(x = x, value = val)))  # Guarda el valor intermedio
   return(val)
 }
+
+schwefel_3d_history <- list()
+
+# Función para llenar el camino de valores 3D
+schwefel_with_history_3d <- function(x) {
+  val <- schwefel(x)
+  schwefel_3d_history <<- c(schwefel_3d_history, list(list(x = x, value = val)))  # Guarda el valor intermedio
+  return(val)
+}
 ```
 
-```{r optimización por BFGS}
+```{r}
+# Optimización 2D
+
 set.seed(1987)
 
 x0_2d <- runif(1, min=-500, max=500)
@@ -299,7 +317,7 @@ x0_2d <- runif(1, min=-500, max=500)
 # Optimización
 res_2d <- optim(
   par = x0_2d,
-  fn = schwefel_with_history,
+  fn = schwefel_with_history_2d,
   method = "BFGS",
   control = list(trace = 1, REPORT = 1, maxit = 500),
   hessian = FALSE  # En 2d no usamos el Hessiano sino el gradiente únicamente
@@ -310,29 +328,29 @@ res_2d$par       # Coordenadas del mínimo encontrado
 res_2d$value     # Valor mínimo de la función
 ```
 
-##### Comportamiento de la solución 2d con descenso del gradiente
-
 ```{r}
+# Optimización 3D
 
+set.seed(1987)
 
+x0_3d <- runif(2, min=-500, max=500)
 
+# Optimización
+res_3d <- optim(
+  par = x0_3d,
+  fn = schwefel_with_history_3d,
+  method = "BFGS",
+  control = list(trace = 1, REPORT = 1, maxit = 1000),
+)
 
+# Resultado
+res_3d$par       # Coordenadas del mínimo encontrado
+res_3d$value     # Valor mínimo de la función
 ```
 
+### 2. Métodos Heurísticos
 
-
-
-
-#### 2. Optimización por descenso del gradiente o métodos Quasi-Newton (3D)
-
-
-
-
-
-
-#### 3. Métodos Heurísticos
-
-##### 3.1 Algoritmo Genético (GA)
+#### 2.1 Algoritmo Genético (GA)
 
 ```{r genetic_algorithm}
 
@@ -345,7 +363,7 @@ res_2d$value     # Valor mínimo de la función
 # 3. Ajustar popSize y maxiter
 ```
 
-##### 3.2 Optimización por Enjambre (PSO)
+#### 2.2 Optimización por Enjambre (PSO)
 
 ```{r pso}
 # COMPLETAR:
@@ -353,7 +371,7 @@ res_2d$value     # Valor mínimo de la función
 # 2. Ajustar control$maxit
 ```
 
-##### 3.3 Evolución Diferencial (DE)
+#### 2.3 Evolución Diferencial (DE)
 
 ```{r deoptim}
 # COMPLETAR:
@@ -361,9 +379,9 @@ res_2d$value     # Valor mínimo de la función
 # 2. Ajustar control$itermax
 ```
 
-## 4. Visualización de Resultados
+## 3. Visualización de Resultados
 
-### 4.1 Animación del Descenso de Gradiente
+### 3.1 Animación del Descenso de Gradiente
 
 ```{r animation_gd}
 # COMPLETAR:
@@ -371,7 +389,7 @@ res_2d$value     # Valor mínimo de la función
 # 2. Graficar con transition_reveal()
 ```
 
-### 4.2 Animación de Métodos Heurísticos
+### 3.2 Animación de Métodos Heurísticos
 
 ```{r animation_heuristic}
 # COMPLETAR:
@@ -379,18 +397,7 @@ res_2d$value     # Valor mínimo de la función
 # 2. Crear animación similar
 ```
 
-## 5. Análisis Comparativo
-
-```{r comparison}
-# COMPLETAR:
-# 1. Crear tabla comparativa con:
-#   - Método
-#   - Iteraciones
-#   - Valor óptimo
-#   - Tiempo de ejecución (system.time())
-```
-
-## 6. Conclusiones
+## 4. Conclusiones
 
 ```{r conclusions, eval=FALSE}
 # DISCUTIR:
@@ -407,36 +414,6 @@ Utilice colonias de hormigas y algoritmos genéticos para encontrar el orden óp
 
 Adicionalmente represente con un gif animado o un video cómo se comporta la mejor solución usando un gráfico del recorrido en el mapa de Colombia.
 
-#### Imagen Ejemplo
-
-```{r figure-name, fig.cap="Figura 1. Descripción", echo=FALSE, out.width="10%", fig.align='center'}
-knitr::include_graphics("logo_unal.png")
-```
-
-#### Ecuación Ejemplo
-
-$$
-f: \mathbb{R}^n \rightarrow \mathbb{R}
-$$
-
-$$
-f(\mathbf{x}) \approx f(\mathbf{x}_0)
-+ \nabla f(\mathbf{x}_0)^\top (\mathbf{x} - \mathbf{x}_0)
-+ \frac{1}{2} (\mathbf{x} - \mathbf{x}_0)^\top H_f(\mathbf{x}_0) (\mathbf{x} - \mathbf{x}_0)
-$$
-
-\begin{equation}
-  Hf(x) = 
-  \begin{pmatrix}
-    \frac{\partial}{\partial x_1}\nabla f^T \\
-    \frac{\partial}{\partial x_2}\nabla f^T
-  \end{pmatrix}
-  =
-  \begin{pmatrix}
-    2 & 0 \\
-    0 & 2
-  \end{pmatrix}
-\end{equation}
 
 ## Reporte de Contribución Individual
 
