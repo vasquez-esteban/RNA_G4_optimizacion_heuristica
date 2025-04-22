@@ -121,11 +121,7 @@ La función se evalúa en el hipercubo: $x_i \in [-500, 500]$, para todo $i = 1,
 
 $f(\mathbf{x}^*) = 0$, en $\mathbf{x}^* = (420.9687, \dots, 420.9687)$
 
-### Función de Griewank
-
-Definir función Aquí
-
-#### Definición de Funciones
+#### Definición de Función
 
 ```{r functions}
 # Función Schwefel
@@ -133,13 +129,8 @@ schwefel <- function(x) {
   A <- 418.9829
   d <- length(x)
   z <- A*d - sum(x * sin(sqrt(abs(x))))
-  
+ 
   return (z)
-}
-
-# Función Griewank (2D y 3D)
-griewank <- function(x) {
-  # COMPLETAR: Implementar fórmula matemática
 }
 ```
 
@@ -159,15 +150,15 @@ Ahora vamos a visualizar la función:
 plot_function <- function(func, x_range = c(-500, 500), n_points = 1000, highlight_x = NULL) {
   # Crear el vector de x en el rango especificado
   x <- seq(x_range[1], x_range[2], length.out = n_points)
-  
+ 
   # Evaluar la función en los puntos de x
   y <- sapply(x, function(xi) func(c(xi)))
-  
+ 
   # Graficar la función
   plot(x, y, type = "l", col = "blue", lwd = 2,
        main = paste("Gráfico de la función", deparse(substitute(func))),
        xlab = "x", ylab = paste(deparse(substitute(func)), "(x)"))
-  
+ 
   # Si se especifica un valor de x para destacar, agregar la línea vertical y el punto
   if (!is.null(highlight_x)) {
     highlight_y <- func(c(highlight_x))
@@ -182,9 +173,9 @@ plot_function(schwefel, highlight_x = 420.9687)
 ```
 
 ```{r}
-plot_function_3d <- function(func, 
-                           x_range = c(-500, 500), 
-                           y_range = c(-500, 500), 
+plot_function_3d <- function(func,
+                           x_range = c(-500, 500),
+                           y_range = c(-500, 500),
                            resolution = 100,
                            optimal_points = NULL,
                            colorscale = "Viridis",
@@ -192,32 +183,32 @@ plot_function_3d <- function(func,
                            x_label = "x",
                            y_label = "y",
                            z_label = "f(x,y)") {
-  
+ 
   # Crear grid de puntos
   x <- seq(x_range[1], x_range[2], length.out = resolution)
   y <- seq(y_range[1], y_range[2], length.out = resolution)
-  
+ 
   # Evaluar la función en toda la cuadrícula
   z <- outer(x, y, Vectorize(function(x, y) func(c(x, y))))
-  
+ 
   # Crear el gráfico 3D interactivo
   p <- plot_ly(x = ~x, y = ~y, z = ~z) %>%
-    add_surface(colorscale = colorscale) 
-  
+    add_surface(colorscale = colorscale)
+ 
   # Agregar puntos óptimos si se especifican
   if (!is.null(optimal_points)) {
     for (i in 1:nrow(optimal_points)) {
       point <- optimal_points[i, ]
       p <- p %>% add_markers(
-        x = point$x, 
-        y = point$y, 
+        x = point$x,
+        y = point$y,
         z = func(c(point$x, point$y)),
         marker = list(color = point$color, size = point$size),
         name = point$name
       )
     }
   }
-  
+ 
   # Configurar el diseño del gráfico
   p <- p %>% layout(
     title = title,
@@ -227,7 +218,7 @@ plot_function_3d <- function(func,
       zaxis = list(title = z_label)
     )
   )
-  
+ 
   return(p)
 }
 ```
@@ -273,6 +264,96 @@ ggplot(grid, aes(x = x, y = y, z = z)) +
   scale_fill_viridis_d() +
   labs(
     title = "Curvas de nivel - Función de Schwefel",
+    subtitle = "Visualización 2D de la superficie 3D",
+    x = "Valor de x_1",
+    y = "Valor de x_2",
+    fill = "Valor de la función"
+  )
+```
+
+### Función de Griewank
+
+$$
+f(\mathbf{x}) = 1 + \frac{1}{4000} \sum_{i=1}^{d} x_i^2 - \prod_{i=1}^{d} \cos\left(\frac{x_i}{\sqrt{i}}\right)
+$$
+
+**Descripción:**
+
+*Dimensiones:* $d$
+
+La función de Griewank tiene una estructura ondulada con múltiples mínimos locales, pero un único mínimo global en el origen.
+
+**Dominio:**
+
+$x_i \in [-600, 600]$, para todo $i = 1, \dots, d$
+
+**Mínimo Global:**
+
+$f(\mathbf{0}) = 0$, en $\mathbf{x} = (0, \dots, 0)$
+
+### Definición de Función
+
+```{r function Griewank}
+# Función Griewank (2D y 3D)
+griewank <- function(x) {
+  sum_term <- sum(x^2) / 4000
+  prod_term <- prod(cos(x / sqrt(seq_along(x))))
+  return(1 + sum_term - prod_term)
+}
+```
+
+```{r}
+griewank(c(0, 0))
+griewank(c(0, 0, 0))
+```
+
+Estos resultados representan el mínimo global de la función de Griewank, que es 0 en el origen.
+
+```{r}
+plot_function(griewank, x_range = c(-600, 600), highlight_x = 0)
+```
+
+```{r fig.cap="**Fig 4.** *Evaluación de Griewank (3D)*", fig.align="center", out.width="70%"}
+# Definir óptimo griewank
+optimal_points <- data.frame(
+  x = c(0),
+  y = c(0),
+  name = c("Óptimo global"),
+  color = c("red"),
+  size = c(5)
+)
+
+# Graficar la función con su óptimo
+plot_function_3d(
+  func = griewank,
+  x_range = c(-600, 600),
+  y_range = c(-600, 600),
+  resolution = 100,
+  optimal_points = optimal_points,
+  title = "Función de Griewank (2D -> 3D)",
+  z_label = "Griewank(x, y)"
+)
+```
+
+```{r fig.cap="**Fig 5.** _Curvas de Nivel de Griewank_", fig.align="center", out.width="70%"}
+# Crear una grilla de puntos (para 2D)
+x_vals <- seq(-600, 600, length.out = 200)
+y_vals <- seq(-600, 600, length.out = 200)
+grid <- expand.grid(x = x_vals, y = y_vals) %>%
+  rowwise() %>%
+  mutate(z = griewank(c(x, y))) %>%
+  ungroup()
+
+# Crear gráfico de curvas de nivel
+ggplot(grid, aes(x = x, y = y, z = z)) +
+  geom_contour_filled(bins = 30) +  # Colores suaves
+  geom_contour(color = "black", alpha = 0.3) +  # Líneas de nivel
+  geom_point(aes(x = 0, y = 0), color = "red", size = 3) +  # Óptimo
+  annotate("text", x = 0, y = 30, label = "Óptimo", color = "red") +
+  theme_minimal() +
+  scale_fill_viridis_d() +
+  labs(
+    title = "Curvas de nivel - Función de Griewank",
     subtitle = "Visualización 2D de la superficie 3D",
     x = "Valor de x_1",
     y = "Valor de x_2",
@@ -353,30 +434,79 @@ res_3d$value     # Valor mínimo de la función
 #### 2.1 Algoritmo Genético (GA)
 
 ```{r genetic_algorithm}
+genetic_optimizer <- function(func, lower, upper, dim, popSize = 50, maxiter = 100) {
+  ga(
+    type = "real-valued",
+    fitness = func,
+    lower = rep(lower, dim),
+    upper = rep(upper, dim),
+    popSize = popSize,
+    maxiter = maxiter
+  )
+}
+```
 
-# Ejemplo Para cargar paquetes
-# resultado <- GA::ga(type = "real-valued", ...)
+```{r GA griewank}
+# GA griewank en 2D
+ga_result_2d <- genetic_optimizer(function(x) -griewank(x), -600, 600, dim = 2)
+print(-ga_result_2d@fitnessValue)
+print(ga_result_2d@solution)
 
-# COMPLETAR:
-# 1. Configurar fitness function
-# 2. Definir límites (lower/upper)
-# 3. Ajustar popSize y maxiter
+# GA griewank en 3D
+ga_result_3d <- genetic_optimizer(function(x) -griewank(x), -600, 600, dim = 3)
+print(-ga_result_3d@fitnessValue)
+print(ga_result_3d@solution)
 ```
 
 #### 2.2 Optimización por Enjambre (PSO)
 
 ```{r pso}
-# COMPLETAR:
-# 1. Configurar fn, lower, upper
-# 2. Ajustar control$maxit
+pso_optimizer <- function(func, lower, upper, dim, maxit = 100, s = 40) {
+  psoptim(
+    par = runif(dim, lower, upper),
+    fn = func,
+    lower = rep(lower, dim),
+    upper = rep(upper, dim),
+    control = list(maxit = maxit, s = s)
+  )
+}
+```
+
+```{r pso griewank}
+# PSO griewank en 2D
+pso_result_2d <- pso_optimizer(griewank, -600, 600, dim = 2)
+print(pso_result_2d$value)
+print(pso_result_2d$par)
+
+# PSO griewank en 3D
+pso_result_3d <- pso_optimizer(griewank, -600, 600, dim = 3)
+print(pso_result_3d$value)
+print(pso_result_3d$par)
 ```
 
 #### 2.3 Evolución Diferencial (DE)
 
 ```{r deoptim}
-# COMPLETAR:
-# 1. Configurar fn, lower, upper
-# 2. Ajustar control$itermax
+de_optimizer <- function(func, lower, upper, dim, NP = 50, itermax = 100) {
+  DEoptim(
+    fn = func,
+    lower = rep(lower, dim),
+    upper = rep(upper, dim),
+    control = list(NP = NP, itermax = itermax, trace = FALSE)
+  )
+}
+```
+
+```{r deoptim griewank}
+# DE griewank en 2D
+de_result_2d <- de_optimizer(griewank, -600, 600, dim = 2)
+print(de_result_2d$optim$bestval)
+print(de_result_2d$optim$bestmem)
+
+# DE griewank en 3D
+de_result_3d <- de_optimizer(griewank, -600, 600, dim = 3)
+print(de_result_3d$optim$bestval)
+print(de_result_3d$optim$bestmem)
 ```
 
 ## 3. Visualización de Resultados
@@ -489,10 +619,52 @@ knitr::include_graphics("files/schwefel_3d_path.gif")
 
 ### 3.2 Animación de Métodos Heurísticos
 
+Tabla de salidas.
+
 ```{r animation_heuristic}
-# COMPLETAR:
-# 1. Extraer trayectorias de GA/PSO/DE
-# 2. Crear animación similar
+# Función para generar nombres de columnas
+data_names <- function(nvar) {
+  names <- paste0("x", 1:nvar)
+  names <- c(names, "fx", "metodo")
+  return(names)
+}
+
+# Función para almacenar resultados
+store_data <- function(sol_matrix, func, method) {
+  dat <- data.frame()
+  for (i in 1:nrow(sol_matrix)) {
+    x <- sol_matrix[i, ]
+    fx <- func(x)
+    dat <- rbind(dat, c(x, fx, method))
+  }
+  colnames(dat) <- data_names(ncol(sol_matrix))
+  return(dat)
+}
+
+# Función para generar el dataframe completo con todas las trayectorias
+data_optim <- function(dim, func, lower, upper, iter = 100) {
+  # Ejecutar optimizadores y obtener trayectorias
+  ga_traj   <- genetic_optimizer(function(x) -func(x), lower, upper, dim, maxiter = iter)@solution
+  pso_traj  <- pso_optimizer(func, lower, upper, dim, maxit = iter)$par
+  de_traj   <- de_optimizer(func, lower, upper, dim, itermax = iter)$optim$bestmem
+
+  # Convertir a dataframes etiquetados
+  df_ga   <- store_data(matrix(ga_traj, nrow = 1), func, "Algoritmo Genético")
+  df_pso  <- store_data(matrix(pso_traj, nrow = 1), func, "PSO")
+  df_de   <- store_data(matrix(de_traj, nrow = 1), func, "Evolución Diferencial")
+
+  # Combinar todo
+  df <- rbind(df_ga, df_pso, df_de)
+
+  # Convertir columnas numéricas
+  for (col in colnames(df)) {
+    if (col != "metodo") {
+      df[[col]] <- as.numeric(df[[col]])
+    }
+  }
+
+  return(df)
+}
 ```
 
 ## 4. Conclusiones
