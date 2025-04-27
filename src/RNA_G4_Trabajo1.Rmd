@@ -245,7 +245,7 @@ plot_function_3d(
 )
 ```
 
-```{r fig.cap="**Fig 3.** _Curvas de Nivel de Schwefel_" , fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 3.** _Curvas de Nivel de Schwefel_", fig.align="center", out.width="70%"}
 # Crear una grilla de puntos (para 2D)
 x_vals <- seq(-500, 500, length.out = 200)
 y_vals <- seq(-500, 500, length.out = 200)
@@ -254,22 +254,49 @@ grid <- expand.grid(x = x_vals, y = y_vals) %>%
   mutate(z = schwefel(c(x, y))) %>%
   ungroup()
 
-# Crear gráfico de curvas de nivel
-ggplot(grid, aes(x = x, y = y, z = z)) +
-  geom_contour_filled(bins = 30) +  # Colores suaves
-  geom_contour(color = "black", alpha = 0.3) +  # Líneas de nivel
-  geom_point(aes(x = 420.9687, y = 420.9687), color = "red", size = 3) +  # Óptimo
+# Crear una grilla de puntos (para 2D)
+x_vals <- seq(-500, 500, length.out = 200)
+y_vals <- seq(-500, 500, length.out = 200)
+grid <- expand.grid(x = x_vals, y = y_vals) %>%
+  rowwise() %>%
+  mutate(z = schwefel(c(x, y))) %>%
+  ungroup()
+
+# Obtener valores mínimo y máximo para crear breaks personalizados
+z_min <- min(grid$z)
+z_max <- max(grid$z)
+
+# Crear el gráfico con la leyenda vertical pequeña a la derecha
+ggplot(grid, aes(x = x, y = y, fill = z)) +
+  geom_raster() +
+  geom_contour(aes(z = z), color = "black", alpha = 0.3) +
+  geom_point(aes(x = 420.9687, y = 420.9687), color = "red", size = 3) +
   annotate("text", x = 420.9687, y = 420.9687 + 30, label = "Óptimo", color = "red") +
   theme_minimal() +
-  scale_fill_viridis_d() +
+  scale_fill_viridis_c(
+    # Crear breaks que incluyan el cero y otros valores importantes
+    breaks = c(z_min, 0, z_max/2, z_max),
+    labels = function(x) round(x, 0)  # Redondear valores para mayor claridad
+  ) +
   labs(
-    title = "Curvas de nivel - Función de Schwefel",
-    subtitle = "Visualización 2D de la superficie 3D",
-    x = "Valor de x_1",
-    y = "Valor de x_2",
+    title = "Mapa de calor + curvas de nivel - Schwefel",
+    subtitle = "Visualización 2D continua",
+    x = "Valor de x₁",
+    y = "Valor de x₂",
     fill = "Valor de la función"
+  ) +
+  # Configurar la leyenda vertical pequeña a la derecha
+  theme(
+    legend.position = "right",
+    legend.title.position = "top",
+    # Hacer que la barra sea aproximadamente el 10% de la altura del gráfico
+    legend.key.height = unit(0.1, "npc"),  # 10% de la altura del gráfico
+    legend.key.width = unit(0.5, "cm"),    # Ancho reducido
+    legend.margin = margin(0, 0, 0, 0),
+    legend.box.margin = margin(0, 0, 0, 10)
   )
 ```
+
 
 ### Función de Griewank
 
@@ -309,7 +336,7 @@ griewank(c(0, 0, 0))
 
 Estos resultados representan el mínimo global de la función de Griewank, que es 0 en el origen.
 
-```{r fig.cap="**Fig 5.** *Evaluación de Griewank (2D)*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 4.** *Evaluación de Griewank (2D)*", fig.align="center", out.width="70%"}
 plot_function(griewank, x_range = c(-600, 600), highlight_x = 0)
 ```
 
@@ -344,26 +371,43 @@ grid <- expand.grid(x = x_vals, y = y_vals) %>%
   mutate(z = griewank(c(x, y))) %>%
   ungroup()
 
-# Crear gráfico de curvas de nivel
-ggplot(grid, aes(x = x, y = y, z = z)) +
-  geom_contour_filled(bins = 30) +  # Colores suaves
-  geom_contour(color = "black", alpha = 0.3) +  # Líneas de nivel
+# Calcular valores importantes para los breaks
+z_min <- min(grid$z)
+z_max <- max(grid$z)
+
+# Crear gráfico con visualización continua
+ggplot(grid, aes(x = x, y = y, fill = z)) +
+  geom_raster() +  # Usar raster para visualización continua
+  geom_contour(aes(z = z), color = "black", alpha = 0.3) +  # Líneas de nivel
   geom_point(aes(x = 0, y = 0), color = "red", size = 3) +  # Óptimo
   annotate("text", x = 0, y = 30, label = "Óptimo", color = "red") +
   theme_minimal() +
-  scale_fill_viridis_d() +
+  scale_fill_viridis_c(
+    # Crear breaks que incluyan el cero y otros valores importantes
+    breaks = c(z_min, 0, z_max/2, z_max),
+    labels = function(x) round(x, 2)  # Redondear valores para mayor claridad
+  ) +
   labs(
-    title = "Curvas de nivel - Función de Griewank",
-    subtitle = "Visualización 2D de la superficie 3D",
-    x = "Valor de x_1",
-    y = "Valor de x_2",
+    title = "Mapa de calor + curvas de nivel - Griewank",
+    subtitle = "Visualización 2D continua",
+    x = "Valor de x₁",
+    y = "Valor de x₂",
     fill = "Valor de la función"
+  ) +
+  # Configurar la leyenda vertical pequeña a la derecha
+  theme(
+    legend.position = "right",
+    legend.title.position = "top",
+    legend.key.height = unit(0.1, "npc"),  # 10% de la altura del gráfico
+    legend.key.width = unit(0.5, "cm"),    # Ancho reducido
+    legend.margin = margin(0, 0, 0, 0),
+    legend.box.margin = margin(0, 0, 0, 10)
   )
 ```
 
 ## 1. Optimización por descenso del gradiente o métodos Quasi-Newton
 
-Como podemos ver, la función cuenta con varios óptimos locales que pueden hacer que un método numérico basado en el gradiente sea propenso a errores. Para ello vamos a ver cómo se comporta la solución del método `optim(method = "BFGS")` que es el más parecido al que vimos en clase. Este método Quasi-Newton optimiza la función utilizando una aproximación del gradiente y la matriz Hessiana, sin calcularlos directamente.
+Como podemos ver, las funciones cuentan con varios mínimos locales que pueden hacer que un método numérico basado en el gradiente sea propenso a errores. Para ello vamos a ver cómo se comporta la solución del método `optim(method = "BFGS")` que es el más parecido al que vimos en clase. Este método Quasi-Newton optimiza la función utilizando una aproximación del gradiente y la matriz Hessiana, sin calcularlos directamente.
 
 Antes de esto vamos a crear vectores para seguir las soluciones halladas.
 
@@ -434,16 +478,39 @@ res_2d_g <- optim(
   control = list(trace = 1, REPORT = 1, maxit = 500),
   hessian = FALSE  # En 2d no usamos el Hessiano sino el gradiente únicamente
 )
+```
 
-print('Schwefel')
-# Resultado
-res_2d$par       # Coordenadas del mínimo encontrado
-res_2d$value     # Valor mínimo de la función
 
-print('Griewank')
-res_2d_g$par
-res_2d_g$value
+```{r echo=FALSE}
+# Óptimos teóricos
+optimo_schwefel_2d <- "f(420.9687, 420.9687) ≈ 0"
+optimo_griewank_2d <- "f(0, 0) = 0"
 
+# Tus resultados
+mi_optimo_schwefel <- paste0("(", 
+                             round(res_2d$par[1], 4),
+                             ") con valor ", round(res_2d$value, 4))
+
+mi_optimo_griewank <- paste0("(", 
+                             round(res_2d_g$par[1], 4),
+                             ") con valor ", round(res_2d_g$value, 4))
+
+# Crear tabla con data.frame
+tabla_2d <- data.frame(
+  Función = c("Schwefel", "Griewank"),
+  Óptimo_Global = c(optimo_schwefel_2d, optimo_griewank_2d),
+  Óptimo_Obtenido = c(mi_optimo_schwefel, mi_optimo_griewank),
+  stringsAsFactors = FALSE
+)
+
+# Mostrar tabla con formato kableExtra
+knitr::kable(tabla_2d, digits = 4, 
+             caption = paste("Tabla 1: Comparación de Óptimos en 2D"),
+             format = "html") %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "hover"),
+                            full_width = FALSE) %>%
+  kableExtra::column_spec(1:ncol(tabla_2d), width = "2cm") %>%
+  kableExtra::row_spec(0, bold = TRUE, color = "black", background = "lightgray")
 ```
 
 ```{r}
@@ -469,14 +536,44 @@ res_3d_g <- optim(
   method = "BFGS",
   control = list(trace = 1, REPORT = 1, maxit = 1000),
 )
-
-# Resultado
-res_3d$par       # Coordenadas del mínimo encontrado
-res_3d$value     # Valor mínimo de la función
-
-res_3d_g$par
-res_3d_g$value
 ```
+
+```{r echo=FALSE}
+# Óptimos teóricos para 3D
+optimo_schwefel_3d <- "f(420.9687, 420.9687) ≈ 0"
+optimo_griewank_3d <- "f(0, 0) = 0"
+
+# Tus resultados para 3D
+mi_optimo_schwefel_3d <- paste0("(", 
+                                round(res_3d$par[1], 4), ", ",
+                                round(res_3d$par[2], 4),
+                                ") con valor ", round(res_3d$value, 4))
+
+mi_optimo_griewank_3d <- paste0("(", 
+                                round(res_3d_g$par[1], 4), ", ",
+                                round(res_3d_g$par[2], 4),
+                                ") con valor ", round(res_3d_g$value, 4))
+
+# Crear tabla con data.frame
+tabla_3d <- data.frame(
+  Función = c("Schwefel", "Griewank"),
+  Óptimo_Global = c(optimo_schwefel_3d, optimo_griewank_3d),
+  Óptimo_Obtenido = c(mi_optimo_schwefel_3d, mi_optimo_griewank_3d),
+  stringsAsFactors = FALSE
+)
+
+# Mostrar tabla con formato kableExtra
+knitr::kable(tabla_3d, digits = 4, 
+             caption = paste("Tabla 2: Comparación de Óptimos en 3D"),
+             format = "html") %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "hover"),
+                            full_width = FALSE) %>%
+  kableExtra::column_spec(1:ncol(tabla_3d), width = "2cm") %>%
+  kableExtra::row_spec(0, bold = TRUE, color = "black", background = "lightgray")
+```
+
+Más adelante vamos a visualizar estos métodos para tener una mejor forma de interpretar los resultados obtenidos. Además vamos a **explicar por qué no se llega al óptimo global**.
+
 
 ### 2. Métodos Heurísticos
 
@@ -629,14 +726,31 @@ optimizer_test <- function(method, func, func_name, dim, lower, upper) {
   # Ordenar por mejor valor
   results_df <- results_df[order(results_df$"Mejor Valor"), ]
   
+  # Numeración dinámica para el caption de la tabla
+  table_num <- switch(method,
+    "GA" = switch(func_name,
+      "Schwefel" = ifelse(dim == 2, 3, 4),
+      "Griewank" = ifelse(dim == 2, 5, 6)
+    ),
+    "PSO" = switch(func_name,
+      "Schwefel" = ifelse(dim == 2, 7, 8),
+      "Griewank" = ifelse(dim == 2, 9, 10)
+    ),
+    "DE" = switch(func_name,
+      "Schwefel" = ifelse(dim == 2, 11, 12),
+      "Griewank" = ifelse(dim == 2, 13, 14)
+    )
+  )
+  
   # Mostrar tabla 
   knitr::kable(results_df, digits = 4, 
-               caption = paste("Resultados GA para", func_name, dim, "D"),
+              caption = paste("Tabla", table_num, ". Resultados de", method, "para", func_name, dim, "D"),
                format = "html") %>%
     kableExtra::kable_styling(bootstrap_options = c("striped", "hover"),
                               full_width = FALSE) %>%
     kableExtra::column_spec(1:ncol(results_df), width = "2cm") %>%
-    kableExtra::row_spec(0, bold = TRUE, color = "white", background = "#3498db")
+    kableExtra::row_spec(0, bold = TRUE, color = "black", background = "lightgray")
+
 }
 ```
 
@@ -813,12 +927,17 @@ de_griewank_2d <- de_optimizer_with_history(griewank, -600, 600, dim = 2, NP = 7
 
 ##### Griewank 3D
 ```{r}
-optimizer_test("DE", griewank, "Griewank", 2, -600, 600)
+optimizer_test("DE", griewank, "Griewank", 3, -600, 600)
 ```
 
 ```{r de_griewank 3D}
 de_griewank_3d <- de_optimizer_with_history(griewank, -600, 600, dim = 3, NP = 30, itermax = 200)
 ```
+
+Nótese que a diferencia de los métodos clásicos como el descenso del gradiente, cada uno de los métodos heurísticos logra llegar al valor óptimo de 0. 
+
+Además, se puede observar que los resultados de Evolución Diferencial tienden a ser más eficientes y llegan a los óptimos en pocas iteraciones. Más adelante entraremos en detalle para comparar a estos algoritmos evolutivos.
+
 
 ## 3. Visualización de Resultados
 
@@ -854,7 +973,7 @@ p <- ggplot() +
 animate(p, fps = 4, width = 600, height = 400, renderer = gifski_renderer("files/schwefel_path.gif"))
 ```
 
-```{r fig.cap="**Fig 6.** *Camino de la solución en Schwefel 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 7.** *Camino de la solución en Schwefel 2D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/schwefel_path.gif")
 ```
 
@@ -918,7 +1037,7 @@ p <- ggplot() +
 animate(p, fps = 7, width = 800, height = 600, renderer = gifski_renderer("files/schwefel_3d_path.gif"))
 ```
 
-```{r fig.cap="**Fig 7.** *Camino de la solución en Schwefel 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 8.** *Camino de la solución en Schwefel 3D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/schwefel_3d_path.gif")
 ```
 
@@ -951,7 +1070,7 @@ p <- ggplot() +
 animate(p, fps = 4, width = 600, height = 400, renderer = gifski_renderer("files/griewank_path.gif"))
 ```
 
-```{r fig.cap="**Fig 8.** *Camino de la solución en Griewank 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 9.** *Camino de la solución en Griewank 2D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/griewank_path.gif")
 ```
 
@@ -1014,7 +1133,7 @@ p <- ggplot() +
 animate(p, fps = 7, width = 800, height = 600, renderer = gifski_renderer("files/griewank_3d_path.gif"))
 ```
 
-```{r fig.cap="**Fig 9.** *Camino de la solución en Griewank 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 10.** *Camino de la solución en Griewank 3D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/griewank_3d_path.gif")
 ```
 
@@ -1066,8 +1185,11 @@ plot_trajectory_animation <- function(history_df, grid_df, func, title, output_f
     geom_point(data = history_df, aes(x = x, y = y, color = step), size = 3, show.legend = FALSE) +
     scale_color_gradient(low = "orange", high = "red") +
     theme_minimal() +
-    labs(title = paste0("Optimizacion de la Funcion ", title),
-         x = "x", y = "y") +
+    labs(
+    title = paste0("Optimización de la Función ", title, "\nPaso: {frame_time}"),
+      x = "x", 
+      y = "y"
+    ) +
     theme(plot.margin = margin(t = 40, r = 10, b = 10, l = 10, unit = "pt")) +
     transition_time(step) +
     shadow_wake(wake_length = 0.1, alpha = 0.3)
@@ -1092,7 +1214,7 @@ grid_df <- create_grid(schwefel, -600, 600)
 plot_trajectory_animation(history_df, grid_df, schwefel, "GA schwefel 2D", "files/ga_schwefel_2d.gif")
 ```
 
-```{r fig.cap="**Fig 10.** *GA Schwefel 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 11.** *GA Schwefel 2D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/ga_schwefel_2d.gif")
 ```
 
@@ -1103,7 +1225,7 @@ grid_df <- create_grid(schwefel, -600, 600)
 plot_trajectory_animation(history_df, grid_df, schwefel, "GA schwefel 3D", "files/ga_schwefel_3d.gif")
 ```
 
-```{r fig.cap="**Fig 11.** *GA Schwefel 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 12.** *GA Schwefel 3D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/ga_schwefel_3d.gif")
 ```
 
@@ -1115,7 +1237,7 @@ grid_df <- create_grid(griewank, -600, 600)
 plot_trajectory_animation(history_df, grid_df, griewank, "GA Griewank 2D", "files/ga_griewank_2d.gif")
 ```
 
-```{r fig.cap="**Fig 12.** *GA Griewank 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 13.** *GA Griewank 2D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/ga_griewank_2d.gif")
 ```
 
@@ -1126,7 +1248,7 @@ grid_df <- create_grid(griewank, -600, 600)
 plot_trajectory_animation(history_df, grid_df, griewank, "GA Griewank 3D", "files/ga_griewank_3d.gif")
 ```
 
-```{r fig.cap="**Fig 13.** *GA Griewank 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 14.** *GA Griewank 3D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/ga_griewank_3d.gif")
 ```
 
@@ -1137,7 +1259,7 @@ grid_df <- create_grid(schwefel, -600, 600)
 plot_trajectory_animation(history_df, grid_df, schwefel, "GPSO schwefel 2D", "files/pso_schwefel_2d.gif")
 ```
 
-```{r fig.cap="**Fig 14.** *PSO Schwefel 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 15.** *PSO Schwefel 2D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/pso_schwefel_2d.gif")
 ```
 
@@ -1148,7 +1270,7 @@ grid_df <- create_grid(schwefel, -600, 600)
 plot_trajectory_animation(history_df, grid_df, schwefel, "GPSO schwefel 3D", "files/pso_schwefel_3d.gif")
 ```
 
-```{r fig.cap="**Fig 15.** *PSO Schwefel 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 16.** *PSO Schwefel 3D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/pso_schwefel_3d.gif")
 ```
 
@@ -1159,7 +1281,7 @@ grid_df <- create_grid(griewank, -600, 600)
 plot_trajectory_animation(history_df, grid_df, griewank, "PSO Griewank 2D", "files/pso_griewank_2d.gif")
 ```
 
-```{r fig.cap="**Fig 16.** *PSO Griewank 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 17.** *PSO Griewank 2D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/pso_griewank_2d.gif")
 ```
 
@@ -1170,7 +1292,7 @@ grid_df <- create_grid(griewank, -600, 600)
 plot_trajectory_animation(history_df, grid_df, griewank, "PSO Griewank 3D", "files/pso_griewank_3d.gif")
 ```
 
-```{r fig.cap="**Fig 17.** *PSO Griewank 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 18.** *PSO Griewank 3D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/pso_griewank_3d.gif")
 ```
 
@@ -1181,7 +1303,7 @@ grid_df <- create_grid(schwefel, -500, 500)
 plot_trajectory_animation(history_df, grid_df, schwefel, "DE Schwefel 2D", "files/de_schwefel_2d.gif")
 ```
 
-```{r fig.cap="**Fig 18.** *DE Schwefel 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 19.** *DE Schwefel 2D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/de_schwefel_2d.gif")
 ```
 
@@ -1192,7 +1314,7 @@ grid_df <- create_grid(schwefel, -500, 500)
 plot_trajectory_animation(history_df, grid_df, schwefel, "DE Schwefel 3D", "files/de_schwefel_3d.gif")
 ```
 
-```{r fig.cap="**Fig 19.** *DE Schwefel 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 20.** *DE Schwefel 3D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/de_schwefel_3d.gif")
 ```
 
@@ -1203,7 +1325,7 @@ grid_df <- create_grid(griewank, -600, 600)
 plot_trajectory_animation(history_df, grid_df, griewank, "DE Griewank 2D", "files/de_griewank_2d.gif")
 ```
 
-```{r fig.cap="**Fig 20.** *DE Griewank 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 21.** *DE Griewank 2D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/de_griewank_2d.gif")
 ```
 
@@ -1214,18 +1336,53 @@ grid_df <- create_grid(griewank, -600, 600)
 plot_trajectory_animation(history_df, grid_df, griewank, "DE Griewank 3D", "files/de_griewank_3d.gif")
 ```
 
-```{r fig.cap="**Fig 21.** *DE Griewank 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 22.** *DE Griewank 3D*", fig.align="center", out.width="70%"}
 knitr::include_graphics("files/de_griewank_3d.gif")
 ```
 
 ## 4. Conclusiones
 
-```{r conclusions, eval=FALSE}
-# DISCUTIR:
-# 1. Ventajas/desventajas de cada método
-# 2. Sensibilidad a parámetros
-# 3. Recomendaciones para cada función
-```
+### 4.1. Métodos Clásicos (Descenso del Gradiente)
+
+Los métodos clásicos presentan limitaciones importantes en escenarios complejos. Para funciones con múltiples mínimos locales o derivadas de difícil cálculo, como Schwefel y Griewank, el descenso del gradiente tiende a quedarse atrapado en óptimos locales que pueden estar lejos del global. En nuestras funciones de prueba, observamos que para Schwefel las soluciones halladas estaban muy alejadas del óptimo, mientras que en Griewank, aunque los resultados fueron algo mejores debido a su forma semi-cuadrática, el método también se asentó en mínimos no globales. Por este motivo, en optimización de funciones no convexas se suele preferir el uso de métodos heurísticos, los cuales analizamos a continuación.
+
+En las visualizaciones (Figuras 7, 8, 9 y 10) se aprecia que, en Schwefel, el optimizador se mueve inicialmente pero pronto queda atrapado en un óptimo local. En Griewank, el punto apenas se desplaza desde su solución inicial debido a la naturaleza ondulada del paisaje de la función.
+
+*Nota: Aunque es posible encontrar mejores resultados seleccionando cuidadosamente la semilla inicial, un optimizador robusto no debería depender de esta elección.*
+
+### 4.2. Métodos Heurísticos
+
+#### 4.2.1. Algoritmos Genéticos
+
+En las Tablas 3, 4, 5 y 6 se presentan los resultados para la optimización de Schwefel y Griewank en 2D y 3D. Estos resultados muestran que los algoritmos genéticos logran alcanzar valores cercanos o iguales al mínimo esperado. Aunque en algunas animaciones el movimiento hacia el óptimo no se muestra completamente, los resultados numéricos evidencian el éxito del algoritmo. Esta discrepancia puede deberse a limitaciones en la resolución de los gráficos, la construcción de los frames o a la dinámica propia del algoritmo.
+
+En las Figuras 11, 12, 13 y 14 se observa que, con poblaciones de 30 y 100 individuos, los algoritmos genéticos obtienen soluciones consistentes en tiempos de ejecución razonables.
+
+#### 4.2.2. Optimización por Enjambre de Partículas (PSO)
+
+En la optimización mediante PSO se utilizaron tamaños de enjambre entre 20 y 60 partículas y máximos de 50 a 200 iteraciones, buscando balancear el tiempo de cómputo con la calidad de las soluciones.
+
+Se observó que, en funciones como Schwefel, PSO puede requerir miles de iteraciones para llegar al óptimo global debido a la complejidad del paisaje de la función. Así, en algunos casos, las trayectorias de las partículas no alcanzan completamente el óptimo dentro del límite de iteraciones establecido, lo cual es un comportamiento esperado.
+
+No se realizaron ajustes manuales de hiperparámetros, pues el objetivo era analizar el desempeño del algoritmo bajo configuraciones estándar.
+
+A pesar de ello, los resultados numéricos en las Tablas 7, 8, 9 y 10 demuestran que PSO es capaz de encontrar el óptimo global, a cambio de un mayor número de iteraciones, sin comprometer gravemente la eficiencia del método.
+
+#### 4.2.3. Evolución Diferencial
+
+Los métodos de Evolución Diferencial mostraron el mejor desempeño entre los métodos analizados. Según las Tablas 11, 12, 13 y 14, este algoritmo encontró consistentemente el óptimo global en Schwefel y Griewank, tanto en 2D como en 3D, utilizando poblaciones de entre 30 y 70 individuos.
+
+Aunque en algunas visualizaciones no se observa claramente el desplazamiento progresivo hacia el óptimo, esto se debe a la dinámica exploratoria del algoritmo, que prueba soluciones diversas antes de converger. Sin embargo, los resultados numéricos avalan que el algoritmo logra alcanzar el óptimo en todos los casos.
+
+Esto resalta la importancia de utilizar las visualizaciones como una herramienta de apoyo para entender la dinámica del algoritmo, pero siempre confirmando los resultados a través de los valores numéricos obtenidos.
+
+### 4.3. Conclusión General
+
+La comparación entre métodos clásicos y heurísticos en la optimización de funciones complejas como Schwefel y Griewank muestra una clara ventaja de los métodos heurísticos. Mientras que el descenso del gradiente tiende a quedarse atrapado en óptimos locales, los algoritmos evolutivos y de enjambre, como los algoritmos genéticos, PSO y evolución diferencial, logran encontrar soluciones globales con alta efectividad.
+
+Aunque las visualizaciones no siempre muestran de manera explícita el camino completo hacia el óptimo debido a limitaciones gráficas o a la propia naturaleza de los algoritmos, los resultados numéricos confirman la eficacia de los métodos heurísticos. Esto subraya la importancia de complementar las herramientas visuales con un análisis riguroso de los datos obtenidos.
+
+En resumen, para problemas de optimización de alta complejidad y con múltiples óptimos locales, los métodos heurísticos se presentan como la mejor alternativa frente a los métodos clásicos de optimización.
 
 # Parte 2: Optimización Combinatoria
 
