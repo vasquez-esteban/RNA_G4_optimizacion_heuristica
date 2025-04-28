@@ -49,17 +49,14 @@ pacman::p_load(
   pso,             # Optimización por enjambre
   DEoptim,         # Evolución diferencial
   
-  # Optimización combinatoria
-  TSP,             # Problema del vendedor viajero
-  acopula,         # Colonias de hormigas
-  
   # Visualización
   ggplot2,         # Gráficos estáticos
   gganimate,       # Animaciones
-  av,              # Exportar videos
   sf,              # Geodatos
-  maps,            # Mapas base
-  plotly,          # Gráficos interactivos
+  plotly,
+  
+  # Optimización de colonias de hormigas
+  ACO,
   
   # Datos
   dplyr            # Manipulación de datos
@@ -73,8 +70,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 packages <- c(
-  "numDeriv", "GA", "pso", "DEoptim", "TSP", "acopula",
-  "ggplot2", "gganimate", "av", "sf", "maps", "plotly", "dplyr"
+  "numDeriv", "GA", "pso", "DEoptim",
+  "ggplot2", "gganimate", "sf", "plotly", "ACO", "dplyr"
 )
 
 not_installed <- packages[!sapply(packages, require, character.only = TRUE)]
@@ -1392,6 +1389,225 @@ Utilice colonias de hormigas y algoritmos genéticos para encontrar el orden óp
 
 Adicionalmente represente con un gif animado o un video cómo se comporta la mejor solución usando un gráfico del recorrido en el mapa de Colombia.
 
+### Procedimiento de levantamiento de datos
+
+#### Definición de ciudades principales
+
+Para el presente trabajo, se seleccionaron las **13 ciudades principales de Colombia** que forman parte del recorrido del vendedor:
+
+- Palmira
+- Pasto
+- Tuluá
+- Bogotá
+- Pereira
+- Armenia
+- Manizales
+- Valledupar
+- Montería
+- Soledad
+- Cartagena
+- Barranquilla
+- Medellín
+- Bucaramanga
+- Cúcuta
+
+### Construcción de la matriz de costos
+
+Con el fin de modelar correctamente el problema, se procedió a levantar los datos de desplazamiento entre cada par de ciudades.  
+Se creó una **matriz origen-destino** que contempla para cada trayecto:
+
+- **Tiempo estimado de viaje** (en horas).
+- **Distancia recorrida** (en kilómetros).
+- **Costo de peajes** (en pesos colombianos - COP).
+- **Costo total estimado de desplazamiento**, calculado como la suma de:
+  - Costo de la hora del vendedor multiplicado por el tiempo de viaje.
+  - Costo de los peajes entre ciudades.
+  - Costo de combustible estimado a partir de la distancia recorrida y el rendimiento del vehículo seleccionado.
+
+Un ejemplo parcial de esta matriz es el siguiente:
+
+Posteriormente, esta información se reorganizó en una **matriz de costos finales** que resume el costo total de desplazamiento entre las ciudades principales, como se muestra a continuación:
+
+Esta matriz servirá como **entrada** para los algoritmos de optimización (Colonias de Hormigas y Algoritmos Genéticos) para determinar el recorrido óptimo.
+
+### Vehículo seleccionado
+
+Para modelar el desplazamiento del vendedor, se seleccionó un **Jeep Wrangler** de características similares a las especificadas en el sitio oficial:
+
+- [Jeep Wrangler - Gasolina - Capacidades](https://www.jeep.es/jeep-wrangler/gasolina/capacidad)
+
+Este vehículo fue elegido por su robustez, fiabilidad para trayectos largos y condiciones variables de carretera.
+
+El consumo promedio de combustible reportado para este tipo de vehículo es de aproximadamente **0,17 litros por kilómetro** como máximo.
+
+### Cálculo del costo del combustible
+
+El precio de la gasolina en Colombia, actualizado para el momento del análisis, es de:
+
+- **15.827 COP por galón**.
+
+Dado que:
+
+- **1 galón** equivale a **3,78541 litros**,
+
+el precio de la gasolina **por litro** se calcula como:
+
+$$
+\text{Precio por litro} = \frac{15.827 \, \text{COP}}{3.78541 \, \text{litros}} \approx 4181,05 \, \text{COP/litro}
+$$
+
+El **Jeep Wrangler** seleccionado presenta un consumo promedio de:
+
+- **0,117 litros por kilómetro recorrido**
+
+Así, el **costo de combustible para cada trayecto** se determina como:
+
+$$
+\text{Costo de combustible} = \text{Distancia recorrida (km)} \times 0.117 \times 4181.05
+$$
+
+Simplificando:
+
+$$
+\text{Costo de combustible} = \text{Distancia recorrida (km)} \times 489.18 \, \text{COP/km}
+$$
+
+donde:
+
+$$
+489.18 \, \text{COP/km} = 0.117 \times 4181.05
+$$
+
+Este valor representa el **costo de combustible por cada kilómetro recorrido**.
+
+### Cálculo del costo de la hora del vendedor
+
+### Supuestos considerados
+
+Para calcular el **costo por hora** del vendedor, se tuvieron en cuenta los siguientes conceptos:
+
+- **Salario mínimo por hora**:  
+  Se consideró el salario mínimo dividido entre una jornada laboral de 8 horas diarias:
+
+  $$
+  \text{Salario mínimo por hora} = 6.189 \, \text{COP/hora}
+  $$
+
+- **Costo de alimentación diario**:  
+  Se estimó un costo promedio de alimentación de **30.000 COP**, y se asumieron **tres comidas diarias**, por lo que:
+
+  $$
+  \text{Costo alimentación diaria} = 30.000 \times 3 = 90.000 \, \text{COP/día}
+  $$
+
+- **Costo de hospedaje diario**:  
+  Se asignó un costo estimado de hospedaje de **150.000 COP** por noche:
+
+  $$
+  \text{Costo hospedaje diario} = 150.000 \, \text{COP/día}
+  $$
+
+### Suma total de costos diarios
+
+La suma total de costos asociados por día es:
+
+$$
+\text{Costo total diario} = (6.189 \times 8) + 90.000 + 150.000
+$$
+
+Calculando:
+
+$$
+\text{Costo total diario} = 49.512 + 90.000 + 150.000 = 289.512 \, \text{COP}
+$$
+
+### Cálculo del costo de hora real
+
+Dado que en un día hay 24 horas, el **costo de la hora del vendedor** considerando todos los factores es:
+
+$$
+\text{Costo hora vendedor} = \frac{289.512}{24} \approx 12.063 \, \text{COP/hora}
+$$
+
+---
+
+Así, para cada trayecto entre ciudades, el **costo asociado al tiempo del vendedor** será:
+
+$$
+\text{Costo asociado al tiempo} = \text{Duración del trayecto (horas)} \times 12.063 \, \text{COP}
+$$
+
+Este componente se sumará al costo de los peajes y al costo del combustible para determinar el **costo total** del recorrido.
+
+```
+$$\text{Costo total} = \text{Tiempo viaje (hr)} \cdot \text{Costo hora vendedor (COP)} + \text{Distancia (km)} \cdot \text{Costo gasolina (COP/km)} + \text{Peajes (COP)}$$
+```
+
+---
+
+### Obtención de tiempos y distancias
+
+Para obtener los datos de **distancia** (en kilómetros) y **tiempo estimado de recorrido** (en horas) entre ciudades, se utilizó **Google Maps**.
+
+- Google Maps es una de las herramientas más actualizadas en cuanto a redes viales, condiciones del tráfico y estimaciones de viaje en Colombia.
+- Permite calcular la mejor ruta considerando **vías principales**, **velocidades promedio** y **restricciones actuales** en las carreteras (como obras, cierres o desvíos).
+- Es ampliamente confiable y aceptado en trabajos académicos y de ingeniería de transporte para estimaciones realistas de tiempo y distancia.
+- Facilita extraer información de recorridos interurbanos de manera precisa y gratuita.
+
+### Obtención de costos de peajes
+
+El valor de los **peajes** entre ciudades fue obtenido directamente de la plataforma oficial del Instituto Nacional de Vías de Colombia (**INVIAS**), específicamente a través de su sistema [HERMES SIV](https://hermes2.invias.gov.co/SIV/).
+
+- INVIAS es el **ente oficial** encargado del mantenimiento, control y actualización de las tarifas de peajes en el territorio nacional.
+- El sistema HERMES proporciona datos actualizados y categorizados según el tipo de vehículo.
+- Para este estudio, se asumió que el Jeep Wrangler corresponde a la **Categoría 1**, por lo que se utilizaron los valores de peaje correspondientes a dicha categoría en todas las rutas analizadas.
+- Esta fuente garantiza que los costos de peaje reflejan los valores **oficiales** y **vigentes** en Colombia.
+
+### Optimización de la obtención de datos
+
+Con el fin de optimizar el proceso de obtención de los datos de **distancia** y **tiempo estimado** entre ciudades, se desarrolló un pequeño procedimiento automático utilizando programación en Python.
+
+### Lógica seguida para la automatización
+
+1. **Lectura de datos iniciales**:
+   - Se partió de un archivo CSV que contenía las combinaciones de ciudades **origen** y **destino**.
+
+2. **Conexión a Google Maps API**:
+   - Se utilizó la API de **Google Maps Directions** para consultar, de manera programática, la distancia y duración de cada trayecto.
+   - Se configuró el API para realizar búsquedas específicas dentro de **Colombia**, agregando automáticamente ", Colombia" a las ciudades ingresadas.
+
+3. **Consulta de rutas**:
+   - Para cada par de ciudades, se realizó una petición a la API de Google Maps.
+   - Se extrajeron dos datos principales:
+     - **Tiempo de recorrido**: obtenido en segundos y convertido a horas.
+     - **Distancia recorrida**: obtenida en metros y convertida a kilómetros.
+
+4. **Actualización del conjunto de datos**:
+   - Los valores de **tiempo** y **distancia** se incorporaron automáticamente en el mismo DataFrame utilizado en el proceso.
+   - Se aplicó una pequeña **pausa de 1 segundo** entre consultas para evitar sobrecargar la API y respetar sus límites de uso.
+
+5. **Almacenamiento de resultados**:
+   - El DataFrame final, ya completado con los datos de tiempo y distancia, se guardó en un nuevo archivo CSV para su posterior análisis y modelamiento. Además se guardo el xlsx con la metodología de costos. Todo se encuentra en la carpeta src/files/input.
+   
+### Seguir el tutorial para cargar el df, quitar la primera fila, las columnas y hacer optimizacioń
+
+ https://reintech.io/blog/ant-colony-optimization-r-tutorial
+
+### (Opcional) Guardar el historial de resultados de optimización para un gráfico de Iteración vs. Evaluación
+
+### Crear un gráfico que dibuje la ruta óptima. 
+
+```{r}
+mapa_colombia <- read_sf("files/input/co.geojson")
+
+plot_mapa <- ggplot(mapa_colombia) + geom_sf(fill="lightgreen")
+
+plot_mapa
+```
+
+En src/files/input hay un ejemplo de geo_json del mapa de colombia. Habría que dibujar las ciudades con coordenadas e ir dibujando la ruta.
+
+### Conclusiones
 
 ## Reporte de Contribución Individual
 
@@ -1405,3 +1621,37 @@ Adicionalmente represente con un gif animado o un video cómo se comporta la mej
 -   [Github](https://github.com/vasquez-esteban/RNA_G4_optimizacion_heuristica)
 
 ## Bibliografía
+
+- R Core Team. (2024). *R: A language and environment for statistical computing*. R Foundation for Statistical Computing. [https://www.r-project.org/](https://www.r-project.org/)
+
+- *R Documentation*. [https://www.rdocumentation.org/](https://www.rdocumentation.org/)
+
+- Simon Fraser University. (s.f.). *Home*. [https://www.sfu.ca/](https://www.sfu.ca/)
+
+- Google. (n.d.). *Google Maps Directions API*. Retrieved April 2025, from https://developers.google.com/maps/documentation/directions/start  
+  ↳ Fuente utilizada para obtener el tiempo y distancia entre ciudades principales de Colombia.
+
+- Instituto Nacional de Vías de Colombia (INVIAS). (n.d.). *Sistema de Información de Peajes HERMES SIV*. Retrieved April 2025, from https://hermes2.invias.gov.co/SIV/  
+  ↳ Fuente oficial para la consulta de tarifas de peajes por categoría vehicular en Colombia.
+
+- Jeep. (n.d.). *Jeep Wrangler - Gasoline Capabilities*. Retrieved April 2025, from https://www.jeep.es/jeep-wrangler/gasolina/capacidad  
+  ↳ Especificaciones del vehículo seleccionado, incluyendo consumo de combustible por kilómetro.
+
+- Ministerio de Minas y Energía de Colombia. (2024). *Precios de la gasolina por galón en Colombia*. Retrieved April 2025, from https://www.minenergia.gov.co/  
+  ↳ Fuente del precio actualizado de la gasolina para cálculo del costo por litro.
+
+- Conversion.org. (n.d.). *Convert gallons to liters*. Retrieved April 2025, from https://www.convert.org/gallons-to-liters  
+  ↳ Conversión de galones a litros para estimar el precio por litro de combustible.
+
+- Ministerio de Trabajo de Colombia. (2025). *Salario mínimo legal vigente 2025*. Retrieved April 2025, from https://www.mintrabajo.gov.co/  
+  ↳ Fuente del salario mínimo legal mensual utilizado para estimar el costo de la hora del vendedor.
+
+- DANE. (n.d.). *Encuesta Nacional de Presupuestos de los Hogares (ENPH)*. Retrieved April 2025, from https://www.dane.gov.co/  
+  ↳ Utilizada como referencia para estimaciones de gasto en alimentación y hospedaje diarios.
+  
+- Reintech. (2023). *Ant Colony Optimization in R: A Tutorial*. Retrieved April 2025, from https://reintech.io/blog/ant-colony-optimization-r-tutorial  
+  ↳ Tutorial utilizado como base para la implementación del algoritmo de optimización por colonias de hormigas.
+
+- OpenAI. (2025). *ChatGPT (versión GPT-4.5) [Modelo de lenguaje grande]*. [https://chat.openai.com/](https://chat.openai.com/)
+
+- DeepSeek. (2024). *DeepSeek: LLM*. [https://chat.deepseek.com/](https://chat.deepseek.com/)
