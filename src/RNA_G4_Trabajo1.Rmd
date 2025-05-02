@@ -54,6 +54,7 @@ pacman::p_load(
   gganimate,       # Animaciones
   sf,              # Geodatos
   plotly,
+  animation,
   
   # Datos
   dplyr,            # Manipulación de datos
@@ -69,7 +70,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 packages <- c(
   "numDeriv", "GA", "pso", "DEoptim",
-  "ggplot2", "gganimate", "sf", "plotly", "ACO", "dplyr"
+  "ggplot2", "gganimate", "sf", "plotly", "dplyr","animation"
 )
 
 not_installed <- packages[!sapply(packages, require, character.only = TRUE)]
@@ -1588,7 +1589,6 @@ Con el fin de optimizar el proceso de obtención de los datos de **distancia** y
    - El DataFrame final, ya completado con los datos de tiempo y distancia, se guardó en un nuevo archivo CSV para su posterior análisis y modelamiento. Además se guardo el xlsx con la metodología de costos. Todo se encuentra en la carpeta src/files/input.
    
 ```{r}
-library(tidyverse)
 
 #Cargamos la matriz de costos y eliminamos la primera columna con nombres de ciudades
 
@@ -1607,7 +1607,7 @@ ciudades_coord <- data.frame(
 )
 
 #Seleccionamos la semilla
-semilla <- 2000
+semilla <- 1987
 
 ```
 
@@ -1737,21 +1737,69 @@ print(paste('Costo total:',aco_distancia,'$ Pesos'))
 ```{r}
 
 
-mapa_colombia <- read_sf("files/input/co.geojson")
-
-plot_mapa <- ggplot(st_geometry(mapa_colombia)) + 
-  geom_sf(fill="lightgreen") +
-  geom_point(data = ciudades_coord, aes(x = long, y = lat), colour = "red")+
-  geom_label(data = ciudades_coord, aes(x = long, y = lat, label=nombre), vjust = -0.5, size = 3,label.size = NA,fill = NA)+
-  ylim(0,11.5)+xlim(-78,-68)
-
-plot_mapa
-
-
 df_solucion_vecino <- data.frame(ciudades_coord$nombre[vmc_ruta],ciudades_coord$long[vmc_ruta],ciudades_coord$lat[vmc_ruta])
 df_solucion_colonia <- data.frame(ciudades_coord$nombre[aco_ruta],ciudades_coord$long[aco_ruta],ciudades_coord$lat[aco_ruta])
 
+mapa_colombia <- read_sf("files/input/co.geojson")
+
+guardar_gif_vecino <- function(){
+  
+  saveGIF(
+  {
+    for (i in 1:nrow(df_solucion_vecino)){
+      ciudades_recorridas <- head(df_solucion_vecino,i)
+      plot(
+        ggplot(st_geometry(mapa_colombia)) + 
+        ggtitle("Mejor ruta utilizando k-vecino más cercano")+
+        geom_sf(fill="lightgreen") +
+        geom_point(data = ciudades_coord, aes(x = long, y = lat), colour = "red")+
+        geom_label(data = ciudades_coord, aes(x = long, y = lat, label=nombre), size = 3,label.size = NA,fill = NA)+
+        ylim(0,11.5)+xlim(-78,-72)+
+        geom_path(data=ciudades_recorridas,aes(x = ciudades_coord.long.vmc_ruta. , y = ciudades_coord.lat.vmc_ruta.),colour="red"))}
+  },
+    movie.name = "ruta_vecino_más_cercano.gif", 
+    interval = 0.5, 
+    ani.width = 600, 
+    ani.height = 600,
+    outdir = getwd()
+  )
+}
+
+guardar_gif_colonia <- function(){
+  
+  saveGIF(
+  {
+    for (i in 1:nrow(df_solucion_colonia)){
+      ciudades_recorridas <- head(df_solucion_colonia,i)
+      plot(
+        ggplot(st_geometry(mapa_colombia)) + 
+        ggtitle("Mejor ruta utilizando colonia de hormigas")+
+        geom_sf(fill="lightgreen") +
+        geom_point(data = ciudades_coord, aes(x = long, y = lat), colour = "red")+
+        geom_label(data = ciudades_coord, aes(x = long, y = lat, label=nombre), size = 3,label.size = NA,fill = NA)+
+        ylim(0,11.5)+xlim(-78,-72)+
+        geom_path(data=ciudades_recorridas,aes(x = ciudades_coord.long.aco_ruta. , y = ciudades_coord.lat.aco_ruta.),colour="red"))}
+  },
+    movie.name = "ruta_colonia_hormigas.gif", 
+    interval = 0.5, 
+    ani.width = 600, 
+    ani.height = 600,
+    outdir = getwd()
+  )
+}
+
+guardar_gif_vecino()
+guardar_gif_colonia()
+
 ```
+```{r fig.cap="**Fig ??.** *Mejor Ruta usando Colonia de Hormigas*", fig.align="center", out.width="70%"}
+knitr::include_graphics("ruta_colonia_hormigas.gif")
+```
+
+```{r fig.cap="**Fig ??.** *Mejor Ruta usando K-Vecino más cercano*", fig.align="center", out.width="70%"}
+knitr::include_graphics("ruta_vecino_más_cercano.gif")
+```
+
 
 ### Conclusiones
 
