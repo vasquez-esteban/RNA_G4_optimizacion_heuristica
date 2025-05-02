@@ -1,13 +1,13 @@
 # Trabajo 1: Optimización Heurística
 
-## 0. Descripción del Proyecto
+## Descripción del Proyecto
 
 Este proyecto hace parte del curso *Redes Neuronales y Algoritmos Bioinspirados* de la Universidad Nacional de Colombia. Se abordan técnicas de optimización numérica y combinatoria mediante el uso de métodos heurísticos como algoritmos genéticos, optimización por enjambre de partículas, evolución diferencial y colonias de hormigas. Además, se comparan con métodos clásicos como el descenso por gradiente.
 
-## 1. Integrantes
+## Integrantes
 
 - Marcos David Carrillo Builes  
-- Tomás Escobar Rivera Monsalve  
+- Tomás Escobar Rivera
 - Jose Fernando López Ramírez  
 - Esteban Vásquez Pérez  
 

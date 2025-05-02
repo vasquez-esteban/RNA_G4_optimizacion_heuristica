@@ -22,7 +22,7 @@ output:
 
 <p><strong>Presentado por:</strong></p>
 
-<p>Marcos David Carrillo Builes<br> Tomás Escobar Rivera Monsalve<br> Jose Fernando López Ramírez <br> Esteban Vásquez Pérez</p>
+<p>Marcos David Carrillo Builes<br> Tomás Escobar Rivera<br> Jose Fernando López Ramírez <br> Esteban Vásquez Pérez</p>
 
 <br><br>
 
@@ -44,20 +44,21 @@ output:
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
   # Optimización numérica
-  numDeriv,       # Gradientes/Hessianos
-  GA,              # Algoritmos genéticos
-  pso,             # Optimización por enjambre
-  DEoptim,         # Evolución diferencial
-  
+  numDeriv, # Gradientes/Hessianos
+  GA, # Algoritmos genéticos
+  pso, # Optimización por enjambre
+  DEoptim, # Evolución diferencial
+
   # Visualización
-  ggplot2,         # Gráficos estáticos
-  gganimate,       # Animaciones
-  sf,              # Geodatos
+  ggplot2, # Gráficos estáticos
+  gganimate, # Animaciones
+  sf, # Geodatos
   plotly,
+  tidyverse,
   animation,
-  
+
   # Datos
-  dplyr,            # Manipulación de datos
+  dplyr, # Manipulación de datos
   tidyverse
 )
 
@@ -70,7 +71,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 packages <- c(
   "numDeriv", "GA", "pso", "DEoptim",
-  "ggplot2", "gganimate", "sf", "plotly", "dplyr","animation"
+  "ggplot2", "gganimate", "sf", "plotly", "dplyr", "animation", "tidyverse"
 )
 
 not_installed <- packages[!sapply(packages, require, character.only = TRUE)]
@@ -124,9 +125,9 @@ $f(\mathbf{x}^*) = 0$, en $\mathbf{x}^* = (420.9687, \dots, 420.9687)$
 schwefel <- function(x) {
   A <- 418.9829
   d <- length(x)
-  z <- A*d - sum(x * sin(sqrt(abs(x))))
- 
-  return (z)
+  z <- A * d - sum(x * sin(sqrt(abs(x))))
+
+  return(z)
 }
 ```
 
@@ -146,15 +147,17 @@ Ahora vamos a visualizar la función:
 plot_function <- function(func, x_range = c(-500, 500), n_points = 1000, highlight_x = NULL) {
   # Crear el vector de x en el rango especificado
   x <- seq(x_range[1], x_range[2], length.out = n_points)
- 
+
   # Evaluar la función en los puntos de x
   y <- sapply(x, function(xi) func(c(xi)))
- 
+
   # Graficar la función
-  plot(x, y, type = "l", col = "blue", lwd = 2,
-       main = paste("Gráfico de la función", deparse(substitute(func))),
-       xlab = "x", ylab = paste(deparse(substitute(func)), "(x)"))
- 
+  plot(x, y,
+    type = "l", col = "blue", lwd = 2,
+    main = paste("Gráfico de la función", deparse(substitute(func))),
+    xlab = "x", ylab = paste(deparse(substitute(func)), "(x)")
+  )
+
   # Si se especifica un valor de x para destacar, agregar la línea vertical y el punto
   if (!is.null(highlight_x)) {
     highlight_y <- func(c(highlight_x))
@@ -170,27 +173,26 @@ plot_function(schwefel, highlight_x = 420.9687)
 
 ```{r}
 plot_function_3d <- function(func,
-                           x_range = c(-500, 500),
-                           y_range = c(-500, 500),
-                           resolution = 100,
-                           optimal_points = NULL,
-                           colorscale = "Viridis",
-                           title = "Visualización 3D de función",
-                           x_label = "x",
-                           y_label = "y",
-                           z_label = "f(x,y)") {
- 
+                             x_range = c(-500, 500),
+                             y_range = c(-500, 500),
+                             resolution = 100,
+                             optimal_points = NULL,
+                             colorscale = "Viridis",
+                             title = "Visualización 3D de función",
+                             x_label = "x",
+                             y_label = "y",
+                             z_label = "f(x,y)") {
   # Crear grid de puntos
   x <- seq(x_range[1], x_range[2], length.out = resolution)
   y <- seq(y_range[1], y_range[2], length.out = resolution)
- 
+
   # Evaluar la función en toda la cuadrícula
   z <- outer(x, y, Vectorize(function(x, y) func(c(x, y))))
- 
+
   # Crear el gráfico 3D interactivo
   p <- plot_ly(x = ~x, y = ~y, z = ~z) %>%
     add_surface(colorscale = colorscale)
- 
+
   # Agregar puntos óptimos si se especifican
   if (!is.null(optimal_points)) {
     for (i in 1:nrow(optimal_points)) {
@@ -204,7 +206,7 @@ plot_function_3d <- function(func,
       )
     }
   }
- 
+
   # Configurar el diseño del gráfico
   p <- p %>% layout(
     title = title,
@@ -214,7 +216,7 @@ plot_function_3d <- function(func,
       zaxis = list(title = z_label)
     )
   )
- 
+
   return(p)
 }
 ```
@@ -271,8 +273,8 @@ ggplot(grid, aes(x = x, y = y, fill = z)) +
   theme_minimal() +
   scale_fill_viridis_c(
     # Crear breaks que incluyan el cero y otros valores importantes
-    breaks = c(z_min, 0, z_max/2, z_max),
-    labels = function(x) round(x, 0)  # Redondear valores para mayor claridad
+    breaks = c(z_min, 0, z_max / 2, z_max),
+    labels = function(x) round(x, 0) # Redondear valores para mayor claridad
   ) +
   labs(
     title = "Mapa de calor + curvas de nivel - Schwefel",
@@ -286,8 +288,8 @@ ggplot(grid, aes(x = x, y = y, fill = z)) +
     legend.position = "right",
     legend.title.position = "top",
     # Hacer que la barra sea aproximadamente el 10% de la altura del gráfico
-    legend.key.height = unit(0.1, "npc"),  # 10% de la altura del gráfico
-    legend.key.width = unit(0.5, "cm"),    # Ancho reducido
+    legend.key.height = unit(0.1, "npc"), # 10% de la altura del gráfico
+    legend.key.width = unit(0.5, "cm"), # Ancho reducido
     legend.margin = margin(0, 0, 0, 0),
     legend.box.margin = margin(0, 0, 0, 10)
   )
@@ -373,15 +375,15 @@ z_max <- max(grid$z)
 
 # Crear gráfico con visualización continua
 ggplot(grid, aes(x = x, y = y, fill = z)) +
-  geom_raster() +  # Usar raster para visualización continua
-  geom_contour(aes(z = z), color = "black", alpha = 0.3) +  # Líneas de nivel
-  geom_point(aes(x = 0, y = 0), color = "red", size = 3) +  # Óptimo
+  geom_raster() + # Usar raster para visualización continua
+  geom_contour(aes(z = z), color = "black", alpha = 0.3) + # Líneas de nivel
+  geom_point(aes(x = 0, y = 0), color = "red", size = 3) + # Óptimo
   annotate("text", x = 0, y = 30, label = "Óptimo", color = "red") +
   theme_minimal() +
   scale_fill_viridis_c(
     # Crear breaks que incluyan el cero y otros valores importantes
-    breaks = c(z_min, 0, z_max/2, z_max),
-    labels = function(x) round(x, 2)  # Redondear valores para mayor claridad
+    breaks = c(z_min, 0, z_max / 2, z_max),
+    labels = function(x) round(x, 2) # Redondear valores para mayor claridad
   ) +
   labs(
     title = "Mapa de calor + curvas de nivel - Griewank",
@@ -394,8 +396,8 @@ ggplot(grid, aes(x = x, y = y, fill = z)) +
   theme(
     legend.position = "right",
     legend.title.position = "top",
-    legend.key.height = unit(0.1, "npc"),  # 10% de la altura del gráfico
-    legend.key.width = unit(0.5, "cm"),    # Ancho reducido
+    legend.key.height = unit(0.1, "npc"), # 10% de la altura del gráfico
+    legend.key.width = unit(0.5, "cm"), # Ancho reducido
     legend.margin = margin(0, 0, 0, 0),
     legend.box.margin = margin(0, 0, 0, 10)
   )
@@ -408,14 +410,13 @@ Como podemos ver, las funciones cuentan con varios mínimos locales que pueden h
 Antes de esto vamos a crear vectores para seguir las soluciones halladas.
 
 ```{r}
-
 # Vectores para almacenar los valores intermedios de la función - Schwefel
 schwefel_2d_history <- list()
 
 # Función para llenar el camino de valores 2D - Schwefel
 schwefel_with_history_2d <- function(x) {
   val <- schwefel(x)
-  schwefel_2d_history <<- c(schwefel_2d_history, list(list(x = x, value = val)))  # Guarda el valor intermedio
+  schwefel_2d_history <<- c(schwefel_2d_history, list(list(x = x, value = val))) # Guarda el valor intermedio
   return(val)
 }
 
@@ -424,17 +425,17 @@ schwefel_3d_history <- list()
 # Función para llenar el camino de valores 3D - Schwefel
 schwefel_with_history_3d <- function(x) {
   val <- schwefel(x)
-  schwefel_3d_history <<- c(schwefel_3d_history, list(list(x = x, value = val)))  # Guarda el valor intermedio
+  schwefel_3d_history <<- c(schwefel_3d_history, list(list(x = x, value = val))) # Guarda el valor intermedio
   return(val)
 }
-  
+
 # Vectores para almacenar los valores intermedios de la función - Griewank
 griewank_2d_history <- list()
 
 # Función para llenar el camino de valores 2D - Schwefel
 griewank_with_history_2d <- function(x) {
   val <- griewank(x)
-  griewank_2d_history <<- c(griewank_2d_history, list(list(x = x, value = val)))  # Guarda el valor intermedio
+  griewank_2d_history <<- c(griewank_2d_history, list(list(x = x, value = val))) # Guarda el valor intermedio
   return(val)
 }
 
@@ -443,9 +444,8 @@ griewank_3d_history <- list()
 # Función para llenar el camino de valores 3D - Schwefel
 griewank_with_history_3d <- function(x) {
   val <- griewank(x)
-  griewank_3d_history <<- c(griewank_3d_history, list(list(x = x, value = val)))  # Guarda el valor intermedio
+  griewank_3d_history <<- c(griewank_3d_history, list(list(x = x, value = val))) # Guarda el valor intermedio
   return(val)
-  
 }
 ```
 
@@ -454,8 +454,8 @@ griewank_with_history_3d <- function(x) {
 
 set.seed(1987)
 
-x0_2d <- runif(1, min=-500, max=500)
-x0_2d_g <- runif(1,min=-600,max=600)
+x0_2d <- runif(1, min = -500, max = 500)
+x0_2d_g <- runif(1, min = -600, max = 600)
 
 # Optimización
 res_2d <- optim(
@@ -463,7 +463,7 @@ res_2d <- optim(
   fn = schwefel_with_history_2d,
   method = "BFGS",
   control = list(trace = 1, REPORT = 1, maxit = 500),
-  hessian = FALSE  # En 2d no usamos el Hessiano sino el gradiente únicamente
+  hessian = FALSE # En 2d no usamos el Hessiano sino el gradiente únicamente
 )
 
 # Optimización Griewank
@@ -472,7 +472,7 @@ res_2d_g <- optim(
   fn = griewank_with_history_2d,
   method = "BFGS",
   control = list(trace = 1, REPORT = 1, maxit = 500),
-  hessian = FALSE  # En 2d no usamos el Hessiano sino el gradiente únicamente
+  hessian = FALSE # En 2d no usamos el Hessiano sino el gradiente únicamente
 )
 ```
 
@@ -483,13 +483,17 @@ optimo_schwefel_2d <- "f(420.9687, 420.9687) ≈ 0"
 optimo_griewank_2d <- "f(0, 0) = 0"
 
 # Tus resultados
-mi_optimo_schwefel <- paste0("(", 
-                             round(res_2d$par[1], 4),
-                             ") con valor ", round(res_2d$value, 4))
+mi_optimo_schwefel <- paste0(
+  "(",
+  round(res_2d$par[1], 4),
+  ") con valor ", round(res_2d$value, 4)
+)
 
-mi_optimo_griewank <- paste0("(", 
-                             round(res_2d_g$par[1], 4),
-                             ") con valor ", round(res_2d_g$value, 4))
+mi_optimo_griewank <- paste0(
+  "(",
+  round(res_2d_g$par[1], 4),
+  ") con valor ", round(res_2d_g$value, 4)
+)
 
 # Crear tabla con data.frame
 tabla_2d <- data.frame(
@@ -500,11 +504,15 @@ tabla_2d <- data.frame(
 )
 
 # Mostrar tabla con formato kableExtra
-knitr::kable(tabla_2d, digits = 4, 
-             caption = paste("Tabla 1: Comparación de Óptimos en 2D"),
-             format = "html") %>%
-  kableExtra::kable_styling(bootstrap_options = c("striped", "hover"),
-                            full_width = FALSE) %>%
+knitr::kable(tabla_2d,
+  digits = 4,
+  caption = paste("Tabla 1: Comparación de Óptimos en 2D"),
+  format = "html"
+) %>%
+  kableExtra::kable_styling(
+    bootstrap_options = c("striped", "hover"),
+    full_width = FALSE
+  ) %>%
   kableExtra::column_spec(1:ncol(tabla_2d), width = "2cm") %>%
   kableExtra::row_spec(0, bold = TRUE, color = "black", background = "lightgray")
 ```
@@ -514,8 +522,8 @@ knitr::kable(tabla_2d, digits = 4,
 
 set.seed(1987)
 
-x0_3d <- runif(2, min=-500, max=500)
-x0_3d_g <- runif(2, min=-600, max=600)
+x0_3d <- runif(2, min = -500, max = 500)
+x0_3d_g <- runif(2, min = -600, max = 600)
 
 
 # Optimización
@@ -540,15 +548,19 @@ optimo_schwefel_3d <- "f(420.9687, 420.9687) ≈ 0"
 optimo_griewank_3d <- "f(0, 0) = 0"
 
 # Tus resultados para 3D
-mi_optimo_schwefel_3d <- paste0("(", 
-                                round(res_3d$par[1], 4), ", ",
-                                round(res_3d$par[2], 4),
-                                ") con valor ", round(res_3d$value, 4))
+mi_optimo_schwefel_3d <- paste0(
+  "(",
+  round(res_3d$par[1], 4), ", ",
+  round(res_3d$par[2], 4),
+  ") con valor ", round(res_3d$value, 4)
+)
 
-mi_optimo_griewank_3d <- paste0("(", 
-                                round(res_3d_g$par[1], 4), ", ",
-                                round(res_3d_g$par[2], 4),
-                                ") con valor ", round(res_3d_g$value, 4))
+mi_optimo_griewank_3d <- paste0(
+  "(",
+  round(res_3d_g$par[1], 4), ", ",
+  round(res_3d_g$par[2], 4),
+  ") con valor ", round(res_3d_g$value, 4)
+)
 
 # Crear tabla con data.frame
 tabla_3d <- data.frame(
@@ -559,11 +571,15 @@ tabla_3d <- data.frame(
 )
 
 # Mostrar tabla con formato kableExtra
-knitr::kable(tabla_3d, digits = 4, 
-             caption = paste("Tabla 2: Comparación de Óptimos en 3D"),
-             format = "html") %>%
-  kableExtra::kable_styling(bootstrap_options = c("striped", "hover"),
-                            full_width = FALSE) %>%
+knitr::kable(tabla_3d,
+  digits = 4,
+  caption = paste("Tabla 2: Comparación de Óptimos en 3D"),
+  format = "html"
+) %>%
+  kableExtra::kable_styling(
+    bootstrap_options = c("striped", "hover"),
+    full_width = FALSE
+  ) %>%
   kableExtra::column_spec(1:ncol(tabla_3d), width = "2cm") %>%
   kableExtra::row_spec(0, bold = TRUE, color = "black", background = "lightgray")
 ```
@@ -596,23 +612,23 @@ genetic_optimizer_with_history <- function(func, lower, upper, dim, popSize, max
   monitor <- function(obj) {
     # Extraer el mejor individuo de la población actual (mayor fitness)
     best <- obj@population[which.max(obj@fitness), ]
-    
+
     # Evaluar la función objetivo con ese individuo
     val <- func(best)
-    
+
     # Guardar la solución y su valor en el historial, indexado por el número de iteración
     history[[obj@iter]] <<- list(x = best, value = val)
   }
 
   # Ejecutar el Algoritmo Genético
   result <- ga(
-    type = "real-valued",                     
-    fitness = function(x) -func(x),           
-    lower = rep(lower, dim),                  
-    upper = rep(upper, dim),                  
-    popSize = popSize,                        
-    maxiter = maxiter,                        
-    monitor = monitor                         
+    type = "real-valued",
+    fitness = function(x) -func(x),
+    lower = rep(lower, dim),
+    upper = rep(upper, dim),
+    popSize = popSize,
+    maxiter = maxiter,
+    monitor = monitor
   )
 
   return(list(result = result, history = history))
@@ -638,14 +654,14 @@ optimizer_test <- function(method, func, func_name, dim, lower, upper) {
       itermax = c(50, 100, 200)
     )
   )
-  
+
   # Crear combinaciones de parámetros
   param_combinations <- expand.grid(params_list)
-  
+
   # Función para ejecutar cada combinación
   run_combination <- function(params) {
     start_time <- Sys.time()
-    
+
     result <- switch(method,
       "GA" = genetic_optimizer_with_history(
         func = func,
@@ -672,29 +688,29 @@ optimizer_test <- function(method, func, func_name, dim, lower, upper) {
         itermax = params[[2]]
       )
     )
-    
+
     # Extraer resultados comunes
     best_value <- switch(method,
       "GA" = -result$result@fitnessValue,
       "PSO" = result$result$value,
       "DE" = result$result$optim$bestval
     )
-    
+
     convergence_iter <- switch(method,
       "GA" = result$result@iter,
       "PSO" = which.min(sapply(result$history, function(x) x$value)),
       "DE" = result$result$optim$iter
     )
-    
+
     elapsed <- as.numeric(Sys.time() - start_time)
-    
+
     # Nombre de parámetros específicos por método
     param_names <- switch(method,
       "GA" = c("Población", "Iteraciones"),
       "PSO" = c("Enjambre", "Iteraciones"),
       "DE" = c("Población", "Iteraciones")
     )
-    
+
     return(c(
       best_value = best_value,
       convergence_iter = convergence_iter,
@@ -703,25 +719,27 @@ optimizer_test <- function(method, func, func_name, dim, lower, upper) {
       time = elapsed
     ))
   }
-  
+
   # Ejecutar todas las combinaciones
   results <- apply(param_combinations, 1, run_combination)
-  
+
   # Convertir a data.frame
   results_df <- as.data.frame(t(results))
-  
+
   # Nombrar columnas según método
-  colnames(results_df) <- c("Mejor Valor", "Iter Convergencia",
-                           switch(method,
-                             "GA" = c("Tamaño Población", "Máx Iteraciones"),
-                             "PSO" = c("Tamaño Enjambre", "Máx Iteraciones"),
-                             "DE" = c("Tamaño Población", "Máx Iteraciones")
-                           ),
-                           "Tiempo (s)")
-  
+  colnames(results_df) <- c(
+    "Mejor Valor", "Iter Convergencia",
+    switch(method,
+      "GA" = c("Tamaño Población", "Máx Iteraciones"),
+      "PSO" = c("Tamaño Enjambre", "Máx Iteraciones"),
+      "DE" = c("Tamaño Población", "Máx Iteraciones")
+    ),
+    "Tiempo (s)"
+  )
+
   # Ordenar por mejor valor
   results_df <- results_df[order(results_df$"Mejor Valor"), ]
-  
+
   # Numeración dinámica para el caption de la tabla
   table_num <- switch(method,
     "GA" = switch(func_name,
@@ -737,16 +755,19 @@ optimizer_test <- function(method, func, func_name, dim, lower, upper) {
       "Griewank" = ifelse(dim == 2, 13, 14)
     )
   )
-  
-  # Mostrar tabla 
-  knitr::kable(results_df, digits = 4, 
-              caption = paste("Tabla", table_num, ". Resultados de", method, "para", func_name, dim, "D"),
-               format = "html") %>%
-    kableExtra::kable_styling(bootstrap_options = c("striped", "hover"),
-                              full_width = FALSE) %>%
+
+  # Mostrar tabla
+  knitr::kable(results_df,
+    digits = 4,
+    caption = paste("Tabla", table_num, ". Resultados de", method, "para", func_name, dim, "D"),
+    format = "html"
+  ) %>%
+    kableExtra::kable_styling(
+      bootstrap_options = c("striped", "hover"),
+      full_width = FALSE
+    ) %>%
     kableExtra::column_spec(1:ncol(results_df), width = "2cm") %>%
     kableExtra::row_spec(0, bold = TRUE, color = "black", background = "lightgray")
-
 }
 ```
 
@@ -801,18 +822,18 @@ pso_optimizer_with_history <- function(func, lower, upper, dim, maxit, s) {
   # Se define una función "envoltura" que intercepta las evaluaciones de la función objetivo
   # y guarda cada punto (posición del enjambre) con su valor correspondiente.
   wrapped_func <- function(x) {
-    val <- func(x)  # Evaluar la función en x
-    history[[length(history) + 1]] <<- list(x = x, value = val)  # Guardar evaluación
-    return(val)  # Devolver el valor calculado (PSO minimiza este valor)
+    val <- func(x) # Evaluar la función en x
+    history[[length(history) + 1]] <<- list(x = x, value = val) # Guardar evaluación
+    return(val) # Devolver el valor calculado (PSO minimiza este valor)
   }
 
   # Ejecutar el algoritmo de PSO:
   result <- psoptim(
-    par = runif(dim, lower, upper),         
-    fn = wrapped_func,                      
-    lower = rep(lower, dim),                
-    upper = rep(upper, dim),                
-    control = list(maxit = maxit, s = s)    
+    par = runif(dim, lower, upper),
+    fn = wrapped_func,
+    lower = rep(lower, dim),
+    upper = rep(upper, dim),
+    control = list(maxit = maxit, s = s)
   )
 
   return(list(result = result, history = history))
@@ -868,26 +889,26 @@ de_optimizer_with_history <- function(func, lower, upper, dim, NP = 50, itermax 
 
   # Ejecuta el algoritmo DE usando la función DEoptim
   result <- DEoptim(
-    fn = func,                    
-    lower = lower_vec,            
-    upper = upper_vec,            
+    fn = func,
+    lower = lower_vec,
+    upper = upper_vec,
     control = DEoptim.control(
-      NP = NP,                    
-      itermax = itermax,         
-      storepopfrom = 1,          
-      trace = FALSE              
+      NP = NP,
+      itermax = itermax,
+      storepopfrom = 1,
+      trace = FALSE
     )
   )
 
   # Extraer el historial de las mejores soluciones por iteración desde result$member$bestmemit
-  pops <- result$member$bestmemit  # Matriz con la mejor solución por iteración (columnas = pasos)
-  history <- vector("list", ncol(pops))  # Inicializar lista de historial
+  pops <- result$member$bestmemit # Matriz con la mejor solución por iteración (columnas = pasos)
+  history <- vector("list", ncol(pops)) # Inicializar lista de historial
 
   # Recorrer las columnas (iteraciones) y guardar cada punto con su evaluación
   for (i in seq_len(ncol(pops))) {
-    x <- pops[, i]             # Solución en la iteración i
-    val <- func(x)             # Evaluar función en ese punto
-    history[[i]] <- list(x = x, value = val)  # Guardar en historial
+    x <- pops[, i] # Solución en la iteración i
+    val <- func(x) # Evaluar función en ese punto
+    history[[i]] <- list(x = x, value = val) # Guardar en historial
   }
 
   return(list(result = result, history = history))
@@ -998,26 +1019,35 @@ p <- ggplot() +
   # Capa BASE de relleno
   geom_raster(data = grid, aes(x = x, y = y, fill = z), alpha = 0.5) +
   scale_fill_viridis_c(option = "viridis", name = "Valor Schwefel") +
-  
+
   # Curvas de nivel
-  geom_contour(data = grid, aes(x = x, y = y, z = z), 
-               color = "black", alpha = 0.4, bins = 15) +
-  
+  geom_contour(
+    data = grid, aes(x = x, y = y, z = z),
+    color = "black", alpha = 0.4, bins = 15
+  ) +
+
   # Trayectoria del optimizador
-  geom_path(data = schwefel_df_3d, aes(x = x, y = y), 
-            color = "darkgrey", alpha = 0.5, linewidth = 0.8) +
-  
+  geom_path(
+    data = schwefel_df_3d, aes(x = x, y = y),
+    color = "darkgrey", alpha = 0.5, linewidth = 0.8
+  ) +
+
   # Puntos animados (nuevo esquema de colores)
-  geom_point(data = schwefel_df_3d, aes(x = x, y = y, color = step), 
-             size = 3, show.legend = FALSE) +
-  scale_color_gradient(low = "orange", high = "red") +  # Azul a verde
-  
+  geom_point(
+    data = schwefel_df_3d, aes(x = x, y = y, color = step),
+    size = 3, show.legend = FALSE
+  ) +
+  scale_color_gradient(low = "orange", high = "red") + # Azul a verde
+
   # Punto óptimo
-  geom_point(aes(x = 420.9687, y = 420.9687), 
-             shape = 17, color = "cyan", size = 4) +
-  annotate("text", x = 420.9687, y = 450, label = "Óptimo Global", 
-           color = "cyan", fontface = "bold") +
-  
+  geom_point(aes(x = 420.9687, y = 420.9687),
+    shape = 17, color = "cyan", size = 4
+  ) +
+  annotate("text",
+    x = 420.9687, y = 450, label = "Óptimo Global",
+    color = "cyan", fontface = "bold"
+  ) +
+
   # Estilo y animación
   theme_minimal() +
   labs(
@@ -1073,7 +1103,6 @@ knitr::include_graphics("files/griewank_path.gif")
 **Camino de la solución en Griewank 3D con curvas de nivel**
 
 ```{r}
-
 x_vals <- seq(-600, 600, length.out = 200)
 y_vals <- seq(-600, 600, length.out = 200)
 grid <- expand.grid(x = x_vals, y = y_vals) %>%
@@ -1086,7 +1115,7 @@ griewank_df_3d <- data.frame(
   x = sapply(griewank_3d_history, function(p) p$x[1]),
   y = sapply(griewank_3d_history, function(p) p$x[2]),
   z = sapply(griewank_3d_history, function(p) p$value)
-  )
+)
 ```
 
 ```{r eval=FALSE}
@@ -1094,26 +1123,35 @@ p <- ggplot() +
   # Capa BASE de relleno
   geom_raster(data = grid, aes(x = x, y = y, fill = z), alpha = 0.5) +
   scale_fill_viridis_c(option = "viridis", name = "Valor Griewank") +
-  
+
   # Curvas de nivel
-  geom_contour(data = grid, aes(x = x, y = y, z = z), 
-               color = "black", alpha = 0.4, bins = 15) +
-  
+  geom_contour(
+    data = grid, aes(x = x, y = y, z = z),
+    color = "black", alpha = 0.4, bins = 15
+  ) +
+
   # Trayectoria del optimizador
-  geom_path(data = griewank_df_3d, aes(x = x, y = y), 
-            color = "darkgrey", alpha = 0.5, linewidth = 0.8) +
-  
+  geom_path(
+    data = griewank_df_3d, aes(x = x, y = y),
+    color = "darkgrey", alpha = 0.5, linewidth = 0.8
+  ) +
+
   # Puntos animados (nuevo esquema de colores)
-  geom_point(data = griewank_df_3d, aes(x = x, y = y, color = step), 
-             size = 3, show.legend = FALSE) +
-  scale_color_gradient(low = "orange", high = "red") +  # Azul a verde
-  
+  geom_point(
+    data = griewank_df_3d, aes(x = x, y = y, color = step),
+    size = 3, show.legend = FALSE
+  ) +
+  scale_color_gradient(low = "orange", high = "red") + # Azul a verde
+
   # Punto óptimo
-  geom_point(aes(x = 0, y = 0), 
-             shape = 17, color = "cyan", size = 4) +
-  annotate("text", x = 0, y = 450, label = "Óptimo Global", 
-           color = "cyan", fontface = "bold") +
-  
+  geom_point(aes(x = 0, y = 0),
+    shape = 17, color = "cyan", size = 4
+  ) +
+  annotate("text",
+    x = 0, y = 450, label = "Óptimo Global",
+    color = "cyan", fontface = "bold"
+  ) +
+
   # Estilo y animación
   theme_minimal() +
   labs(
@@ -1169,8 +1207,9 @@ plot_trajectory_animation <- function(history_df, grid_df, func, title, output_f
 
   # Posición del texto
   optimal_label_y <- ifelse(!is.na(opt_point[2]) && opt_point[2] > 0,
-                            opt_point[2] + 30,
-                            opt_point[2] + 3)
+    opt_point[2] + 30,
+    opt_point[2] + 3
+  )
 
   # Crear el gráfico
   p <- ggplot() +
@@ -1182,8 +1221,8 @@ plot_trajectory_animation <- function(history_df, grid_df, func, title, output_f
     scale_color_gradient(low = "orange", high = "red") +
     theme_minimal() +
     labs(
-    title = paste0("Optimización de la Función ", title, "\nPaso: {frame_time}"),
-      x = "x", 
+      title = paste0("Optimización de la Función ", title, "\nPaso: {frame_time}"),
+      x = "x",
       y = "y"
     ) +
     theme(plot.margin = margin(t = 40, r = 10, b = 10, l = 10, unit = "pt")) +
@@ -1194,8 +1233,10 @@ plot_trajectory_animation <- function(history_df, grid_df, func, title, output_f
   if (!any(is.na(opt_point))) {
     p <- p +
       geom_point(aes(x = opt_point[1], y = opt_point[2]), shape = 17, color = "cyan", size = 4) +
-      annotate("text", x = opt_point[1], y = optimal_label_y, label = "Óptimo Global", 
-               color = "cyan", fontface = "bold")
+      annotate("text",
+        x = opt_point[1], y = optimal_label_y, label = "Óptimo Global",
+        color = "cyan", fontface = "bold"
+      )
   }
 
   # Animar
@@ -1206,6 +1247,7 @@ plot_trajectory_animation <- function(history_df, grid_df, func, title, output_f
 ```{r, eval=FALSE}
 # GA Schwefel 2D
 history_df <- convert_history_to_df(ga_schwefel_2d$history)
+
 grid_df <- create_grid(schwefel, -600, 600)
 plot_trajectory_animation(history_df, grid_df, schwefel, "GA schwefel 2D", "files/ga_schwefel_2d.gif")
 ```
@@ -1348,6 +1390,8 @@ En las visualizaciones (Figuras 7, 8, 9 y 10) se aprecia que, en Schwefel, el op
 
 ### 4.2. Métodos Heurísticos
 
+**Nótese que el paso en cada gif es simplemente un medidor de tiempo de fotograma para referencia y no representa el paso del optimizador**
+
 #### 4.2.1. Algoritmos Genéticos
 
 En las Tablas 3, 4, 5 y 6 se presentan los resultados para la optimización de Schwefel y Griewank en 2D y 3D. Estos resultados muestran que los algoritmos genéticos logran alcanzar valores cercanos o iguales al mínimo esperado. Aunque en algunas animaciones el movimiento hacia el óptimo no se muestra completamente, los resultados numéricos evidencian el éxito del algoritmo. Esta discrepancia puede deberse a limitaciones en la resolución de los gráficos, la construcción de los frames o a la dinámica propia del algoritmo.
@@ -1392,7 +1436,7 @@ Adicionalmente represente con un gif animado o un video cómo se comporta la mej
 
 #### Definición de ciudades principales
 
-Para el presente trabajo, se seleccionaron las **13 ciudades principales de Colombia** que forman parte del recorrido del vendedor:
+Para el presente trabajo, se seleccionaron las **15 ciudades principales de Colombia** que forman parte del recorrido del vendedor:
 
 - Palmira
 - Pasto
@@ -1538,9 +1582,7 @@ $$
 
 Este componente se sumará al costo de los peajes y al costo del combustible para determinar el **costo total** del recorrido.
 
-```
 $$\text{Costo total} = \text{Tiempo viaje (hr)} \cdot \text{Costo hora vendedor (COP)} + \text{Distancia (km)} \cdot \text{Costo gasolina (COP/km)} + \text{Peajes (COP)}$$
-```
 
 ---
 
@@ -1589,11 +1631,14 @@ Con el fin de optimizar el proceso de obtención de los datos de **distancia** y
    - El DataFrame final, ya completado con los datos de tiempo y distancia, se guardó en un nuevo archivo CSV para su posterior análisis y modelamiento. Además se guardo el xlsx con la metodología de costos. Todo se encuentra en la carpeta src/files/input.
    
 ```{r}
+# Cargamos la matriz de costos y eliminamos la primera columna con nombres de ciudades
 
-#Cargamos la matriz de costos y eliminamos la primera columna con nombres de ciudades
-
-costos <- as.matrix(read.csv("files/input/matriz_costos.csv", header = TRUE, sep = ",",stringsAsFactors=FALSE))
-costos <- subset(costos,select=-Ciudades)
+costos <- as.matrix(read.csv("files/input/matriz_costos.csv",
+  header = TRUE,
+  sep = ",",
+  stringsAsFactors = FALSE
+))
+costos <- subset(costos, select = -Ciudades)
 costos <- gsub("(.*),.*", "\\1", costos)
 costos <- gsub("\\.", "\\1", costos)
 class(costos) <- "numeric"
@@ -1601,19 +1646,24 @@ class(costos) <- "numeric"
 
 
 ciudades_coord <- data.frame(
-  'nombre'= c('Palmira',"Pasto","Tuluá","Bogotá","Pereira","Armenia","Manizales","Valledupar","Montería","Soledad","Cartagena","Barranquilla","Medellín","Bucaramanga","Cúcuta"),
-  'long' = c(-76.5,-77.3,-76.2,-74.1,-75.7,-75.7,-75.5,-73.3,-75.9,-74.8,-75.5,-74.8,-75.6,-73.1,-72.5),
-  'lat' = c(3.5,1.2,4.1,4.6,4.8,4.5,5,10.5,8.7,10.9,10.4,11,6.3,7.1,7.9)
+  "nombre" = c(
+    "Palmira", "Pasto", "Tuluá", "Bogotá", "Pereira", "Armenia", "Manizales",
+    "Valledupar", "Montería", "Soledad", "Cartagena", "Barranquilla",
+    "Medellín", "Bucaramanga", "Cúcuta"
+  ),
+  "long" = c(
+    -76.5, -77.3, -76.2, -74.1, -75.7, -75.7, -75.5, -73.3, -75.9, -74.8,
+    -75.5, -74.8, -75.6, -73.1, -72.5
+  ),
+  "lat" = c(3.5, 1.2, 4.1, 4.6, 4.8, 4.5, 5, 10.5, 8.7, 10.9, 10.4, 11, 6.3, 7.1, 7.9)
 )
 
-#Seleccionamos la semilla
-semilla <- 1987
-
+# Seleccionamos la semilla
+semilla <- 42
 ```
 
 ```{r}
-
-#Función Heurística Vecino más cercano
+# Función Heurística Vecino más cercano
 
 vecino_mas_cercano <- function(matriz_costos) {
   num_ciudades <- nrow(matriz_costos)
@@ -1621,9 +1671,9 @@ vecino_mas_cercano <- function(matriz_costos) {
   ruta <- integer(num_ciudades)
   set.seed(semilla)
   ciudad_actual <- sample(1:num_ciudades, 1)
-  ruta[1] <- ciudad_actual 
+  ruta[1] <- ciudad_actual
   visitadas[ciudad_actual] <- TRUE
-  
+
   for (i in 2:num_ciudades) {
     distancias <- matriz_costos[ciudad_actual, ]
     distancias[visitadas] <- Inf
@@ -1632,32 +1682,37 @@ vecino_mas_cercano <- function(matriz_costos) {
     visitadas[ciudad_siguiente] <- TRUE
     ciudad_actual <- ciudad_siguiente
   }
-  
-  #Regreso
+
+  # Regreso
   ruta <- c(ruta, ruta[1])
   distancia_total <- sum(sapply(1:(length(ruta) - 1), function(i) {
     matriz_costos[ruta[i], ruta[i + 1]]
   }))
-  
+
   return(list(ruta = ruta, distancia_total = distancia_total))
 }
-
 ```
 
 ```{r}
 # Función de optimización por Colonia de Hormigas
 
-optimizacion_colonia_hormigas <- function(costos, num_hormigas = 50, num_iteraciones = 100, alpha = 1, beta = 5, rho = 0.1, Q = 100) {
+optimizacion_colonia_hormigas <- function(costos,
+                                          num_hormigas = 50,
+                                          num_iteraciones = 100,
+                                          alpha = 1,
+                                          beta = 5,
+                                          rho = 0.1,
+                                          Q = 100) {
   num_ciudades <- nrow(costos)
   feromonas <- matrix(1, nrow = num_ciudades, ncol = num_ciudades)
-  
+
   mejor_ruta <- NULL
   mejor_distancia <- Inf
-  
+
   for (iter in 1:num_iteraciones) {
     conjunto_rutas <- list()
     conjunto_distancias <- numeric(num_hormigas)
-    
+
     for (hormiga in 1:num_hormigas) {
       set.seed(semilla)
       ciudad_inicial <- sample(1:num_ciudades, 1)
@@ -1666,12 +1721,12 @@ optimizacion_colonia_hormigas <- function(costos, num_hormigas = 50, num_iteraci
       ciudad_actual <- ciudad_inicial
       ruta[1] <- ciudad_actual
       visitadas[ciudad_actual] <- TRUE
-      
+
       for (i in 2:num_ciudades) {
         probabilidades <- numeric(num_ciudades)
         for (j in 1:num_ciudades) {
           if (!visitadas[j]) {
-            probabilidades[j] <- (feromonas[ciudad_actual, j] ^ alpha) * ((1 / costos[ciudad_actual, j]) ^ beta)
+            probabilidades[j] <- (feromonas[ciudad_actual, j]^alpha) * ((1 / costos[ciudad_actual, j])^beta)
           }
         }
         probabilidades <- probabilidades / sum(probabilidades)
@@ -1680,34 +1735,33 @@ optimizacion_colonia_hormigas <- function(costos, num_hormigas = 50, num_iteraci
         visitadas[ciudad_siguiente] <- TRUE
         ciudad_actual <- ciudad_siguiente
       }
-      
+
       ruta <- c(ruta, ciudad_inicial) # Regreso a ciudad inicial
       distancia <- sum(sapply(1:(length(ruta) - 1), function(i) {
         costos[ruta[i], ruta[i + 1]]
       }))
-      
+
       conjunto_rutas[[hormiga]] <- ruta
       conjunto_distancias[hormiga] <- distancia
-      
+
       if (distancia < mejor_distancia) {
         mejor_ruta <- ruta
         mejor_distancia <- distancia
       }
     }
-    
+
     feromonas <- (1 - rho) * feromonas
     for (hormiga in 1:num_hormigas) {
       for (i in 1:(length(conjunto_rutas[[hormiga]]) - 1)) {
-        feromonas[conjunto_rutas[[hormiga]][i], conjunto_rutas[[hormiga]][i + 1]] <- feromonas[conjunto_rutas[[hormiga]][i], conjunto_rutas[[hormiga]][i + 1]] + Q / conjunto_distancias[hormiga]
+        feromonas[conjunto_rutas[[hormiga]][i], conjunto_rutas[[hormiga]][i + 1]] <-
+          feromonas[conjunto_rutas[[hormiga]][i], conjunto_rutas[[hormiga]][i + 1]] + Q / conjunto_distancias[hormiga]
       }
       feromonas[conjunto_rutas[[hormiga]][length(conjunto_rutas[[hormiga]])], conjunto_rutas[[hormiga]][1]] <- feromonas[conjunto_rutas[[hormiga]][length(conjunto_rutas[[hormiga]])], conjunto_rutas[[hormiga]][1]] + Q / conjunto_distancias[hormiga]
     }
   }
-  
+
   return(list(ruta = mejor_ruta, distancia_total = mejor_distancia))
 }
-
-
 ```
 
 ```{r}
@@ -1716,73 +1770,93 @@ vmc_resultado <- vecino_mas_cercano(costos)
 vmc_ruta <- vmc_resultado$ruta
 vmc_distancia <- vmc_resultado$distancia_total
 
-#Corremos la optimización de colonia de hormigas
+# Corremos la optimización de colonia de hormigas
 aco_resultado <- optimizacion_colonia_hormigas(costos)
 aco_ruta <- aco_resultado$ruta
 aco_distancia <- aco_resultado$distancia_total
 
-#Imprimir resultados
+# Imprimir resultados
 print(paste("Ruta Vecino más cercano:", paste(ciudades_coord$nombre[vmc_ruta], collapse = " -> ")))
-print(paste('Costo total:',vmc_distancia,'$ Pesos'))
+print(paste("Costo total:", vmc_distancia, "$ Pesos"))
 
 print(paste("Ruta Colonia de Hormigas:", paste(ciudades_coord$nombre[aco_ruta], collapse = " -> ")))
-print(paste('Costo total:',aco_distancia,'$ Pesos'))
-
-
+print(paste("Costo total:", aco_distancia, "$ Pesos"))
 ```
 
 
 ### Crear un gráfico que dibuje la ruta óptima. 
 
 ```{r}
-
-
-df_solucion_vecino <- data.frame(ciudades_coord$nombre[vmc_ruta],ciudades_coord$long[vmc_ruta],ciudades_coord$lat[vmc_ruta])
-df_solucion_colonia <- data.frame(ciudades_coord$nombre[aco_ruta],ciudades_coord$long[aco_ruta],ciudades_coord$lat[aco_ruta])
+df_solucion_vecino <-
+  data.frame(ciudades_coord$nombre[vmc_ruta], ciudades_coord$long[vmc_ruta], ciudades_coord$lat[vmc_ruta])
+df_solucion_colonia <-
+  data.frame(ciudades_coord$nombre[aco_ruta], ciudades_coord$long[aco_ruta], ciudades_coord$lat[aco_ruta])
 
 mapa_colombia <- read_sf("files/input/co.geojson")
 
-guardar_gif_vecino <- function(){
-  
+guardar_gif_vecino <- function() {
   saveGIF(
-  {
-    for (i in 1:nrow(df_solucion_vecino)){
-      ciudades_recorridas <- head(df_solucion_vecino,i)
-      plot(
-        ggplot(st_geometry(mapa_colombia)) + 
-        ggtitle("Mejor ruta utilizando k-vecino más cercano")+
-        geom_sf(fill="lightgreen") +
-        geom_point(data = ciudades_coord, aes(x = long, y = lat), colour = "red")+
-        geom_label(data = ciudades_coord, aes(x = long, y = lat, label=nombre), size = 3,label.size = NA,fill = NA)+
-        ylim(0,11.5)+xlim(-78,-72)+
-        geom_path(data=ciudades_recorridas,aes(x = ciudades_coord.long.vmc_ruta. , y = ciudades_coord.lat.vmc_ruta.),colour="red"))}
-  },
-    movie.name = "ruta_vecino_más_cercano.gif", 
-    interval = 0.5, 
-    ani.width = 600, 
+    {
+      for (i in 1:nrow(df_solucion_vecino)) {
+        ciudades_recorridas <- head(df_solucion_vecino, i)
+        plot(
+          ggplot(st_geometry(mapa_colombia)) +
+            ggtitle("Mejor ruta utilizando k-vecino más cercano") +
+            geom_sf(fill = "lightgreen") +
+            geom_point(data = ciudades_coord, aes(x = long, y = lat), colour = "red") +
+            geom_label(
+              data = ciudades_coord, aes(x = long, y = lat, label = nombre),
+              size = 3, label.size = NA, fill = NA
+            ) +
+            ylim(0, 11.5) +
+            xlim(-78, -72) +
+            geom_path(
+              data = ciudades_recorridas, aes(
+                x = ciudades_coord.long.vmc_ruta.,
+                y = ciudades_coord.lat.vmc_ruta.
+              ),
+              colour = "red"
+            )
+        )
+      }
+    },
+    movie.name = "ruta_vecino_más_cercano.gif",
+    interval = 0.5,
+    ani.width = 600,
     ani.height = 600,
     outdir = getwd()
   )
 }
 
-guardar_gif_colonia <- function(){
-  
+guardar_gif_colonia <- function() {
   saveGIF(
-  {
-    for (i in 1:nrow(df_solucion_colonia)){
-      ciudades_recorridas <- head(df_solucion_colonia,i)
-      plot(
-        ggplot(st_geometry(mapa_colombia)) + 
-        ggtitle("Mejor ruta utilizando colonia de hormigas")+
-        geom_sf(fill="lightgreen") +
-        geom_point(data = ciudades_coord, aes(x = long, y = lat), colour = "red")+
-        geom_label(data = ciudades_coord, aes(x = long, y = lat, label=nombre), size = 3,label.size = NA,fill = NA)+
-        ylim(0,11.5)+xlim(-78,-72)+
-        geom_path(data=ciudades_recorridas,aes(x = ciudades_coord.long.aco_ruta. , y = ciudades_coord.lat.aco_ruta.),colour="red"))}
-  },
-    movie.name = "ruta_colonia_hormigas.gif", 
-    interval = 0.5, 
-    ani.width = 600, 
+    {
+      for (i in 1:nrow(df_solucion_colonia)) {
+        ciudades_recorridas <- head(df_solucion_colonia, i)
+        plot(
+          ggplot(st_geometry(mapa_colombia)) +
+            ggtitle("Mejor ruta utilizando colonia de hormigas") +
+            geom_sf(fill = "lightgreen") +
+            geom_point(data = ciudades_coord, aes(x = long, y = lat), colour = "red") +
+            geom_label(
+              data = ciudades_coord, aes(x = long, y = lat, label = nombre),
+              size = 3, label.size = NA, fill = NA
+            ) +
+            ylim(0, 11.5) +
+            xlim(-78, -72) +
+            geom_path(
+              data = ciudades_recorridas, aes(
+                x = ciudades_coord.long.aco_ruta.,
+                y = ciudades_coord.lat.aco_ruta.
+              ),
+              colour = "red"
+            )
+        )
+      }
+    },
+    movie.name = "ruta_colonia_hormigas.gif",
+    interval = 0.5,
+    ani.width = 600,
     ani.height = 600,
     outdir = getwd()
   )
@@ -1790,25 +1864,43 @@ guardar_gif_colonia <- function(){
 
 guardar_gif_vecino()
 guardar_gif_colonia()
-
 ```
-```{r fig.cap="**Fig ??.** *Mejor Ruta usando Colonia de Hormigas*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 22.** *Mejor Ruta usando Colonia de Hormigas*", fig.align="center", out.width="70%"}
 knitr::include_graphics("ruta_colonia_hormigas.gif")
 ```
 
-```{r fig.cap="**Fig ??.** *Mejor Ruta usando K-Vecino más cercano*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 23.** *Mejor Ruta usando K-Vecino más cercano*", fig.align="center", out.width="70%"}
 knitr::include_graphics("ruta_vecino_más_cercano.gif")
 ```
 
-
 ### Conclusiones
+
+#### Modelamiento adecuado del problema:
+Se logró representar correctamente el problema del viajante de comercio (TSP), incorporando no solo las distancias entre ciudades, sino también variables contextuales relevantes del territorio colombiano, como el costo de peajes, el consumo de combustible y la tarifa por hora del vendedor. Esta aproximación realista permite obtener soluciones más útiles y aplicables a escenarios logísticos reales.
+
+#### Importancia de los datos de entrada:
+La calidad y precisión de la matriz de costos fue clave para garantizar resultados confiables. Esta matriz fue generada automáticamente a partir de la API de Google Maps, combinando factores económicos como precios de combustible y tarifas, lo que permitió construir una representación detallada y actualizada del problema.
+
+#### Comparación de algoritmos:
+
+- El algoritmo de **Vecino Más Cercano** produjo una ruta con un costo total de **3,887,351 pesos**, siendo una heurística determinista y voraz que toma decisiones locales inmediatas, sin considerar el impacto global. Aunque es computacionalmente eficiente, tiende a quedarse atrapado en soluciones subóptimas.
+
+- Por su parte, el algoritmo de **Colonia de Hormigas** logró una ruta con un costo total de **3,613,332 pesos**, lo que representa una mejora del **7.05%** respecto al Vecino Más Cercano. Este enfoque estocástico es capaz de explorar un espacio de soluciones más amplio, evitando óptimos locales mediante el uso de feromonas, memoria colectiva y exploración probabilística.
+
+#### Consideraciones finales:
+Aunque ACO requiere mayor tiempo de cómputo y ajuste de parámetros, su desempeño superior en esta instancia demuestra su potencial en problemas complejos de optimización combinatoria. Con mayor número de iteraciones y calibración, es esperable que supere consistentemente a heurísticas simples como el Vecino Más Cercano.
+
 
 ## Reporte de Contribución Individual
 
--   Marcos David Carrillo Builes
--   Tomás Escobar Rivera Monsalve
--   Jose Fernando López Ramírez
--   Esteban Vásquez Pérez
+- Marcos David Carrillo Builes: Participó en la implementación del algoritmo de colonia de hormigas para la búsqueda de rutas óptimas entre las principales ciudades de Colombia. Realizó la recolección de coordenadas geográficas, la búsqueda de mapas base, y elaboró visualizaciones gráficas de las rutas obtenidas. Además, contribuyó en la documentación correspondiente a esta sección.
+
+- Tomás Escobar Rivera: Desarrolló e implementó diversos algoritmos heurísticos para abordar el problema de optimización planteado en el punto 1. Se encargó de la modularización y limpieza del código, la creación de funciones de visualización, el ajuste de hiperparámetros, y la elaboración de gráficos que ilustran el desempeño de los optimizadores. Redactó las conclusiones y documentó detalladamente el proceso de optimización heurística y elaboró las conclusiones de colonia de hormigas.
+
+- Jose Fernando López Ramírez: Fue responsable de la investigación bibliográfica y metodológica necesaria para construir la matriz de costos empleada en el análisis. Documentó su proceso de obtención y su aplicación dentro del marco general del proyecto.
+
+- Esteban Vásquez Pérez: Coordinó el formato general del informe, la gestión de paquetes y dependencias, así como la administración del repositorio y la publicación del trabajo. Implementó la optimización de la función de Schwefel mediante el método de descenso, y elaboró gráficos 2D, 3D y curvas de nivel. Además, redactó las conclusiones y documentación matemática del punto 1, construyó la matriz de costos en Excel y organizó la bibliografía del informe.
+
 
 ## Repositorio en Github
 
@@ -1817,6 +1909,21 @@ knitr::include_graphics("ruta_vecino_más_cercano.gif")
 ## Bibliografía
 
 - R Core Team. (2024). *R: A language and environment for statistical computing*. R Foundation for Statistical Computing. [https://www.r-project.org/](https://www.r-project.org/)
+
+- Scrucca, L. (2013). GA: A Package for Genetic Algorithms in R. Journal of Statistical Software, 53(4), 1–37. https://cran.r-project.org/package=GA
+  ↳ Utilizado para implementar el algoritmo genético (GA) y guardar el historial de soluciones en cada iteración.
+
+- Bendtsen, C. (2012). DEoptim: An R Package for Global Optimization by Differential Evolution. Retrieved April 2025, from https://cran.r-project.org/package=DEoptim
+  ↳ Usado para aplicar el método de evolución diferencial y extraer la mejor solución por iteración.
+
+- Bendtsen, C. (2012). pso: Particle Swarm Optimization. Retrieved April 2025, from https://cran.r-project.org/package=pso
+  ↳ Herramienta utilizada para implementar la optimización por enjambre de partículas (PSO) en 2 y 3 dimensiones.
+
+- Surjanovic, S., & Bingham, D. (n.d.). Schwefel Function (schwef). Simon Fraser University. Retrieved April 2025, from https://www.sfu.ca/~ssurjano/schwef.html
+  ↳ Fuente utilizada para la definición matemática, dominio y mínimo global de la función de Schwefel.
+
+- Surjanovic, S., & Bingham, D. (n.d.). Griewank Function (griewank). Simon Fraser University. Retrieved April 2025, from https://www.sfu.ca/~ssurjano/griewank.html
+  ↳ Fuente utilizada para la descripción formal, propiedades y representación de la función de Griewank.
 
 - *R Documentation*. [https://www.rdocumentation.org/](https://www.rdocumentation.org/)
 
