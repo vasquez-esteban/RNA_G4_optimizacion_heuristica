@@ -68,7 +68,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #### Verificación de la carga de paquetes
 
-```{r}
+```{r carga_paquetes, echo=FALSE}
 packages <- c(
   "numDeriv", "GA", "pso", "DEoptim",
   "ggplot2", "gganimate", "sf", "plotly", "dplyr", "animation", "tidyverse"
@@ -142,7 +142,7 @@ Estos resultados representan valores aproximados a cero debido a errores de redo
 
 Ahora vamos a visualizar la función:
 
-```{r}
+```{r plot_schwefel, echo=FALSE}
 # Código para graficar cualquier función
 plot_function <- function(func, x_range = c(-500, 500), n_points = 1000, highlight_x = NULL) {
   # Crear el vector de x en el rango especificado
@@ -171,7 +171,7 @@ plot_function <- function(func, x_range = c(-500, 500), n_points = 1000, highlig
 plot_function(schwefel, highlight_x = 420.9687)
 ```
 
-```{r}
+```{r echo=FALSE}
 plot_function_3d <- function(func,
                              x_range = c(-500, 500),
                              y_range = c(-500, 500),
@@ -221,7 +221,7 @@ plot_function_3d <- function(func,
 }
 ```
 
-```{r fig.cap="**Fig 2.** *Evaluación de Schwefel (3D)*", fig.align="center", out.width="70%", layout.align="center"}
+```{r fig.cap="**Fig 2.** *Evaluación de Schwefel (3D)*", fig.align="center", out.width="70%", layout.align="center", echo=FALSE}
 # Definir óptimo schwefel
 optimal_points <- data.frame(
   x = c(420.9687),
@@ -243,7 +243,7 @@ plot_function_3d(
 )
 ```
 
-```{r fig.cap="**Fig 3.** _Curvas de Nivel de Schwefel_", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 3.** _Curvas de Nivel de Schwefel_", fig.align="center", out.width="70%", echo=FALSE, warning=FALSE}
 # Crear una grilla de puntos (para 2D)
 x_vals <- seq(-500, 500, length.out = 200)
 y_vals <- seq(-500, 500, length.out = 200)
@@ -338,7 +338,7 @@ Estos resultados representan el mínimo global de la función de Griewank, que e
 plot_function(griewank, x_range = c(-600, 600), highlight_x = 0)
 ```
 
-```{r fig.cap="**Fig 5.** *Evaluación de Griewank (3D)*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 5.** *Evaluación de Griewank (3D)*", fig.align="center", out.width="70%", echo=FALSE}
 # Definir óptimo griewank
 optimal_points <- data.frame(
   x = c(0),
@@ -360,7 +360,7 @@ plot_function_3d(
 )
 ```
 
-```{r fig.cap="**Fig 6.** _Curvas de Nivel de Griewank_", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 6.** _Curvas de Nivel de Griewank_", fig.align="center", out.width="70%", echo=FALSE, warning=FALSE}
 # Crear una grilla de puntos (para 2D)
 x_vals <- seq(-600, 600, length.out = 200)
 y_vals <- seq(-600, 600, length.out = 200)
@@ -409,7 +409,7 @@ Como podemos ver, las funciones cuentan con varios mínimos locales que pueden h
 
 Antes de esto vamos a crear vectores para seguir las soluciones halladas.
 
-```{r}
+```{r echo=FALSE}
 # Vectores para almacenar los valores intermedios de la función - Schwefel
 schwefel_2d_history <- list()
 
@@ -449,7 +449,7 @@ griewank_with_history_3d <- function(x) {
 }
 ```
 
-```{r}
+```{r echo=FALSE}
 # Optimización 2D
 
 set.seed(1987)
@@ -517,7 +517,7 @@ knitr::kable(tabla_2d,
   kableExtra::row_spec(0, bold = TRUE, color = "black", background = "lightgray")
 ```
 
-```{r}
+```{r echo=FALSE}
 # Optimización 3D
 
 set.seed(1987)
@@ -599,7 +599,7 @@ Estrategias de Evolución Diferencial (DE), un método robusto de optimización 
 
 #### 2.1 Algoritmo Genético (GA)
 
-```{r Algoritmo Genético}
+```{r Algoritmo Genético, echo=FALSE}
 # Función que aplica un Algoritmo Genético (GA) para optimizar una función de prueba
 # y guarda el historial de las mejores soluciones en cada iteración.
 
@@ -637,7 +637,7 @@ genetic_optimizer_with_history <- function(func, lower, upper, dim, popSize, max
 
 Creamos una tabla para ver los resultados con varios valores posibles y comparar las soluciones para así elegir los mejores parámetros. De una vez la generalizamos para los otros métodos.
 
-```{r tabla_ga}
+```{r tabla_ga, echo=FALSE}
 optimizer_test <- function(method, func, func_name, dim, lower, upper) {
   # Definir parámetros por método
   params_list <- switch(method,
@@ -811,7 +811,7 @@ ga_griewank_3d <- genetic_optimizer_with_history(griewank, -600, 600, dim = 3, p
 
 #### 2.2 Optimización por Enjambre (PSO)
 
-```{r Optimización por Enjambre}
+```{r Optimización por Enjambre, echo=FALSE}
 # Función que aplica el algoritmo de Optimización por Enjambre de Partículas (PSO)
 # para minimizar una función objetivo y guarda el historial de puntos evaluados.
 
@@ -878,7 +878,7 @@ pso_griewank_3d <- pso_optimizer_with_history(griewank, -600, 600, dim = 2, maxi
 
 #### 2.3 Evolución Diferencial (DE)
 
-```{r Evolución Diferencial}
+```{r Evolución Diferencial, echo=FALSE}
 # Función que aplica el algoritmo de Evolución Diferencial (DE)
 # para minimizar una función objetivo y guarda el historial de soluciones.
 
@@ -964,7 +964,7 @@ Para crear la animación debemos generar múltiples imágenes usando el historia
 
 #### Schwefel
 
-```{r}
+```{r, echo=FALSE}
 # Base de la curva de la función schwefel
 x_vals <- seq(-500, 500, length.out = 1000)
 curve_df_2d <- data.frame(x = x_vals, value = sapply(x_vals, function(xi) schwefel(c(xi))))
@@ -979,7 +979,7 @@ schwefel_df_2d <- data.frame(
 
 **Camino de la solución en Schwefel 2D**
 
-```{r eval=FALSE}
+```{r eval=FALSE, echo=FALSE}
 p <- ggplot() +
   geom_line(data = curve_df_2d, aes(x = x, y = value), color = "blue", linewidth = 1.2) +
   geom_point(data = schwefel_df_2d, aes(x = x, y = value), color = "red", size = 2) +
@@ -990,7 +990,7 @@ p <- ggplot() +
 animate(p, fps = 4, width = 600, height = 400, renderer = gifski_renderer("files/schwefel_path.gif"))
 ```
 
-```{r fig.cap="**Fig 7.** *Camino de la solución en Schwefel 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 7.** *Camino de la solución en Schwefel 2D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/schwefel_path.gif")
 ```
 
@@ -998,7 +998,7 @@ Como podemos notar, los algoritmos numéricos dependen altamente de la elección
 
 **Camino de la solución en Schwefel 3D con curvas de nivel**
 
-```{r}
+```{r echo=FALSE}
 x_vals <- seq(-500, 500, length.out = 200)
 y_vals <- seq(-500, 500, length.out = 200)
 grid <- expand.grid(x = x_vals, y = y_vals) %>%
@@ -1014,7 +1014,7 @@ schwefel_df_3d <- data.frame(
 )
 ```
 
-```{r eval=FALSE}
+```{r eval=FALSE, echo=FALSE}
 p <- ggplot() +
   # Capa BASE de relleno
   geom_raster(data = grid, aes(x = x, y = y, fill = z), alpha = 0.5) +
@@ -1063,14 +1063,14 @@ p <- ggplot() +
 animate(p, fps = 7, width = 800, height = 600, renderer = gifski_renderer("files/schwefel_3d_path.gif"))
 ```
 
-```{r fig.cap="**Fig 8.** *Camino de la solución en Schwefel 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 8.** *Camino de la solución en Schwefel 3D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/schwefel_3d_path.gif")
 ```
 
 #### Griewank
 
 
-```{r}
+```{r echo=FALSE}
 # Base de la curva de la función Griewank
 x_vals <- seq(-600, 600, length.out = 1000)
 curve_df_2d_g <- data.frame(x = x_vals, value = sapply(x_vals, function(xi) griewank(c(xi))))
@@ -1085,7 +1085,7 @@ griewank_df_2d <- data.frame(
 
 **Camino de la solución en Griewank 2D**
 
-```{r eval=FALSE}
+```{r eval=FALSE, echo=FALSE}
 p <- ggplot() +
   geom_line(data = curve_df_2d_g, aes(x = x, y = value), color = "blue", linewidth = 1.2) +
   geom_point(data = griewank_df_2d, aes(x = x, y = value), color = "red", size = 2) +
@@ -1096,13 +1096,13 @@ p <- ggplot() +
 animate(p, fps = 4, width = 600, height = 400, renderer = gifski_renderer("files/griewank_path.gif"))
 ```
 
-```{r fig.cap="**Fig 9.** *Camino de la solución en Griewank 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 9.** *Camino de la solución en Griewank 2D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/griewank_path.gif")
 ```
 
 **Camino de la solución en Griewank 3D con curvas de nivel**
 
-```{r}
+```{r echo=FALSE}
 x_vals <- seq(-600, 600, length.out = 200)
 y_vals <- seq(-600, 600, length.out = 200)
 grid <- expand.grid(x = x_vals, y = y_vals) %>%
@@ -1118,7 +1118,7 @@ griewank_df_3d <- data.frame(
 )
 ```
 
-```{r eval=FALSE}
+```{r eval=FALSE, echo=FALSE}
 p <- ggplot() +
   # Capa BASE de relleno
   geom_raster(data = grid, aes(x = x, y = y, fill = z), alpha = 0.5) +
@@ -1167,13 +1167,13 @@ p <- ggplot() +
 animate(p, fps = 7, width = 800, height = 600, renderer = gifski_renderer("files/griewank_3d_path.gif"))
 ```
 
-```{r fig.cap="**Fig 10.** *Camino de la solución en Griewank 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 10.** *Camino de la solución en Griewank 3D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/griewank_3d_path.gif")
 ```
 
 ### 3.2 Animación de Métodos Heurísticos
 
-```{r animación métodos heurísticos}
+```{r animación métodos heurísticos, echo=FALSE}
 # Convertir historial en data.frame
 convert_history_to_df <- function(history) {
   df <- data.frame(
@@ -1244,7 +1244,7 @@ plot_trajectory_animation <- function(history_df, grid_df, func, title, output_f
 }
 ```
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # GA Schwefel 2D
 history_df <- convert_history_to_df(ga_schwefel_2d$history)
 
@@ -1252,129 +1252,129 @@ grid_df <- create_grid(schwefel, -600, 600)
 plot_trajectory_animation(history_df, grid_df, schwefel, "GA schwefel 2D", "files/ga_schwefel_2d.gif")
 ```
 
-```{r fig.cap="**Fig 11.** *GA Schwefel 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 11.** *GA Schwefel 2D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/ga_schwefel_2d.gif")
 ```
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # GA Schwefel 3D
 history_df <- convert_history_to_df(ga_schwefel_3d$history)
 grid_df <- create_grid(schwefel, -600, 600)
 plot_trajectory_animation(history_df, grid_df, schwefel, "GA schwefel 3D", "files/ga_schwefel_3d.gif")
 ```
 
-```{r fig.cap="**Fig 12.** *GA Schwefel 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 12.** *GA Schwefel 3D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/ga_schwefel_3d.gif")
 ```
 
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # GA Griewank 2D
 history_df <- convert_history_to_df(ga_griewank_2d$history)
 grid_df <- create_grid(griewank, -600, 600)
 plot_trajectory_animation(history_df, grid_df, griewank, "GA Griewank 2D", "files/ga_griewank_2d.gif")
 ```
 
-```{r fig.cap="**Fig 13.** *GA Griewank 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 13.** *GA Griewank 2D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/ga_griewank_2d.gif")
 ```
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # GA Griewank 3D
 history_df <- convert_history_to_df(ga_griewank_3d$history)
 grid_df <- create_grid(griewank, -600, 600)
 plot_trajectory_animation(history_df, grid_df, griewank, "GA Griewank 3D", "files/ga_griewank_3d.gif")
 ```
 
-```{r fig.cap="**Fig 14.** *GA Griewank 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 14.** *GA Griewank 3D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/ga_griewank_3d.gif")
 ```
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # PSO Schwefel 2D
 history_df <- convert_history_to_df(pso_schwefel_2d$history)
 grid_df <- create_grid(schwefel, -600, 600)
 plot_trajectory_animation(history_df, grid_df, schwefel, "GPSO schwefel 2D", "files/pso_schwefel_2d.gif")
 ```
 
-```{r fig.cap="**Fig 15.** *PSO Schwefel 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 15.** *PSO Schwefel 2D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/pso_schwefel_2d.gif")
 ```
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # PSO Schwefel 3D
 history_df <- convert_history_to_df(pso_schwefel_3d$history)
 grid_df <- create_grid(schwefel, -600, 600)
 plot_trajectory_animation(history_df, grid_df, schwefel, "GPSO schwefel 3D", "files/pso_schwefel_3d.gif")
 ```
 
-```{r fig.cap="**Fig 16.** *PSO Schwefel 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 16.** *PSO Schwefel 3D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/pso_schwefel_3d.gif")
 ```
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # PSO Griewank 2D
 history_df <- convert_history_to_df(pso_griewank_2d$history)
 grid_df <- create_grid(griewank, -600, 600)
 plot_trajectory_animation(history_df, grid_df, griewank, "PSO Griewank 2D", "files/pso_griewank_2d.gif")
 ```
 
-```{r fig.cap="**Fig 17.** *PSO Griewank 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 17.** *PSO Griewank 2D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/pso_griewank_2d.gif")
 ```
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # PSO Griewank 3D
 history_df <- convert_history_to_df(pso_griewank_3d$history)
 grid_df <- create_grid(griewank, -600, 600)
 plot_trajectory_animation(history_df, grid_df, griewank, "PSO Griewank 3D", "files/pso_griewank_3d.gif")
 ```
 
-```{r fig.cap="**Fig 18.** *PSO Griewank 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 18.** *PSO Griewank 3D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/pso_griewank_3d.gif")
 ```
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # DE Schwefel 2D
 history_df <- convert_history_to_df(de_schwefel_2d$history)
 grid_df <- create_grid(schwefel, -500, 500)
 plot_trajectory_animation(history_df, grid_df, schwefel, "DE Schwefel 2D", "files/de_schwefel_2d.gif")
 ```
 
-```{r fig.cap="**Fig 19.** *DE Schwefel 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 19.** *DE Schwefel 2D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/de_schwefel_2d.gif")
 ```
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # DE Schwefel 3D
 history_df <- convert_history_to_df(de_schwefel_3d$history)
 grid_df <- create_grid(schwefel, -500, 500)
 plot_trajectory_animation(history_df, grid_df, schwefel, "DE Schwefel 3D", "files/de_schwefel_3d.gif")
 ```
 
-```{r fig.cap="**Fig 20.** *DE Schwefel 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 20.** *DE Schwefel 3D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/de_schwefel_3d.gif")
 ```
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # DE Griewank 2D
 history_df <- convert_history_to_df(de_griewank_2d$history)
 grid_df <- create_grid(griewank, -600, 600)
 plot_trajectory_animation(history_df, grid_df, griewank, "DE Griewank 2D", "files/de_griewank_2d.gif")
 ```
 
-```{r fig.cap="**Fig 21.** *DE Griewank 2D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 21.** *DE Griewank 2D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/de_griewank_2d.gif")
 ```
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # DE Griewank 3D
 history_df <- convert_history_to_df(de_griewank_3d$history)
 grid_df <- create_grid(griewank, -600, 600)
 plot_trajectory_animation(history_df, grid_df, griewank, "DE Griewank 3D", "files/de_griewank_3d.gif")
 ```
 
-```{r fig.cap="**Fig 22.** *DE Griewank 3D*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 22.** *DE Griewank 3D*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("files/de_griewank_3d.gif")
 ```
 
@@ -1630,7 +1630,7 @@ Con el fin de optimizar el proceso de obtención de los datos de **distancia** y
 5. **Almacenamiento de resultados**:
    - El DataFrame final, ya completado con los datos de tiempo y distancia, se guardó en un nuevo archivo CSV para su posterior análisis y modelamiento. Además se guardo el xlsx con la metodología de costos. Todo se encuentra en la carpeta src/files/input.
    
-```{r}
+```{r echo=FALSE}
 # Cargamos la matriz de costos y eliminamos la primera columna con nombres de ciudades
 
 costos <- as.matrix(read.csv("files/input/matriz_costos.csv",
@@ -1662,7 +1662,7 @@ ciudades_coord <- data.frame(
 semilla <- 42
 ```
 
-```{r}
+```{r echo=FALSE}
 # Función Heurística Vecino más cercano
 
 vecino_mas_cercano <- function(matriz_costos) {
@@ -1693,7 +1693,7 @@ vecino_mas_cercano <- function(matriz_costos) {
 }
 ```
 
-```{r}
+```{r echo=FALSE}
 # Función de optimización por Colonia de Hormigas
 
 optimizacion_colonia_hormigas <- function(costos,
@@ -1764,7 +1764,7 @@ optimizacion_colonia_hormigas <- function(costos,
 }
 ```
 
-```{r}
+```{r echo=FALSE}
 # Corremos la función vecino más cercano
 vmc_resultado <- vecino_mas_cercano(costos)
 vmc_ruta <- vmc_resultado$ruta
@@ -1786,7 +1786,7 @@ print(paste("Costo total:", aco_distancia, "$ Pesos"))
 
 ### Crear un gráfico que dibuje la ruta óptima. 
 
-```{r}
+```{r echo=FALSE}
 df_solucion_vecino <-
   data.frame(ciudades_coord$nombre[vmc_ruta], ciudades_coord$long[vmc_ruta], ciudades_coord$lat[vmc_ruta])
 df_solucion_colonia <-
@@ -1865,11 +1865,11 @@ guardar_gif_colonia <- function() {
 guardar_gif_vecino()
 guardar_gif_colonia()
 ```
-```{r fig.cap="**Fig 22.** *Mejor Ruta usando Colonia de Hormigas*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 22.** *Mejor Ruta usando Colonia de Hormigas*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("ruta_colonia_hormigas.gif")
 ```
 
-```{r fig.cap="**Fig 23.** *Mejor Ruta usando K-Vecino más cercano*", fig.align="center", out.width="70%"}
+```{r fig.cap="**Fig 23.** *Mejor Ruta usando K-Vecino más cercano*", fig.align="center", out.width="70%", echo=FALSE}
 knitr::include_graphics("ruta_vecino_más_cercano.gif")
 ```
 
@@ -1904,7 +1904,7 @@ Aunque ACO requiere mayor tiempo de cómputo y ajuste de parámetros, su desempe
 
 ## Repositorio en Github
 
--   [Github](https://github.com/vasquez-esteban/RNA_G4_optimizacion_heuristica)
+-   [Click Derecho Y Abrir en Nueva Pestaña](https://github.com/vasquez-esteban/RNA_G4_optimizacion_heuristica)
 
 ## Bibliografía
 
