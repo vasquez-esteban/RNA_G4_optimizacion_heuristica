@@ -1481,7 +1481,7 @@ Para modelar el desplazamiento del vendedor, se seleccionó un **Jeep Wrangler**
 
 Este vehículo fue elegido por su robustez, fiabilidad para trayectos largos y condiciones variables de carretera.
 
-El consumo promedio de combustible reportado para este tipo de vehículo es de aproximadamente **0,17 litros por kilómetro** como máximo.
+El consumo promedio de combustible reportado para este tipo de vehículo es de aproximadamente **0,117 litros por kilómetro** como máximo.
 
 ### Cálculo del costo del combustible
 
@@ -1941,17 +1941,14 @@ Aunque ACO requiere mayor tiempo de cómputo y ajuste de parámetros, su desempe
 - Ministerio de Minas y Energía de Colombia. (2024). *Precios de la gasolina por galón en Colombia*. Retrieved April 2025, from https://www.minenergia.gov.co/  
   ↳ Fuente del precio actualizado de la gasolina para cálculo del costo por litro.
 
-- Conversion.org. (n.d.). *Convert gallons to liters*. Retrieved April 2025, from https://www.convert.org/gallons-to-liters  
-  ↳ Conversión de galones a litros para estimar el precio por litro de combustible.
-
 - Ministerio de Trabajo de Colombia. (2025). *Salario mínimo legal vigente 2025*. Retrieved April 2025, from https://www.mintrabajo.gov.co/  
   ↳ Fuente del salario mínimo legal mensual utilizado para estimar el costo de la hora del vendedor.
 
 - DANE. (n.d.). *Encuesta Nacional de Presupuestos de los Hogares (ENPH)*. Retrieved April 2025, from https://www.dane.gov.co/  
   ↳ Utilizada como referencia para estimaciones de gasto en alimentación y hospedaje diarios.
   
-- Reintech. (2023). *Ant Colony Optimization in R: A Tutorial*. Retrieved April 2025, from https://reintech.io/blog/ant-colony-optimization-r-tutorial  
-  ↳ Tutorial utilizado como base para la implementación del algoritmo de optimización por colonias de hormigas.
+- Dorigo, M., & Blum, C. (2005). Ant colony optimization theory: A survey. Theoretical Computer Science, 344(2–3), 243–278. https://doi.org/10.1016/j.tcs.2005.05.020
+  ↳ Fuente académica que describe el algoritmo de optimización por colonia de hormigas (ACO), utilizado como base para la implementación en este trabajo.
 
 - OpenAI. (2025). *ChatGPT (versión GPT-4.5) [Modelo de lenguaje grande]*. [https://chat.openai.com/](https://chat.openai.com/)
 
