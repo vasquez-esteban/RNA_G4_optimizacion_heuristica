@@ -66,3 +66,6 @@ Desktop.ini
 install.sh
 uninstall.sh
 /rsconnect
+src/ruta_colonia_hormigas.gif
+src/ruta_vecino_más_cercano.gif
+*.gif
